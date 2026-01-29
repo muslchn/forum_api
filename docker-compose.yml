@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: forum-api-db
+    environment:
+      POSTGRES_USER: ${PGUSER:-developer}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-supersecretpassword}
+      POSTGRES_INITDB_ARGS: "-c max_connections=200"
+    ports:
+      - "${PGPORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-developer}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - forum-network
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: forum-api-app
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      HOST: 0.0.0.0
+      PGHOST: postgres
+      PGPORT: ${PGPORT:-5432}
+      PGUSER: ${PGUSER:-developer}
+      PGDATABASE: ${PGDATABASE:-forumapi}
+      PGPASSWORD: ${PGPASSWORD:-supersecretpassword}
+      ACCESS_TOKEN_KEY: ${ACCESS_TOKEN_KEY}
+      REFRESH_TOKEN_KEY: ${REFRESH_TOKEN_KEY}
+      ACCESS_TOKEN_AGE: ${ACCESS_TOKEN_AGE:-3000}
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./migrations:/app/migrations
+    networks:
+      - forum-network
+    restart: unless-stopped
+    command: >
+      sh -c "npm run migrate up &&
+             node src/app.js"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  forum-network:
+    driver: bridge
