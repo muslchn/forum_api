@@ -12,7 +12,15 @@ describe('AddThreadUseCase', () => {
       owner: 'user-123',
     };
 
+    // Mock return value
     const mockAddedThread = new AddedThread({
+      id: 'thread-123',
+      title: useCasePayload.title,
+      owner: useCasePayload.owner,
+    });
+
+    // Expected value (different object for robust testing)
+    const expectedAddedThread = new AddedThread({
       id: 'thread-123',
       title: useCasePayload.title,
       owner: useCasePayload.owner,
@@ -28,7 +36,7 @@ describe('AddThreadUseCase', () => {
 
     const addedThread = await addThreadUseCase.execute(useCasePayload);
 
-    expect(addedThread).toStrictEqual(mockAddedThread);
+    expect(addedThread).toStrictEqual(expectedAddedThread);
     expect(mockThreadRepository.addThread).toBeCalledWith(new NewThread(useCasePayload));
   });
 });

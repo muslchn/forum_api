@@ -17,7 +17,15 @@ describe('AddUserUseCase', () => {
       fullname: 'Dicoding Indonesia',
     };
 
+    // Mock return value
     const mockRegisteredUser = new RegisteredUser({
+      id: 'user-123',
+      username: useCasePayload.username,
+      fullname: useCasePayload.fullname,
+    });
+
+    // Expected value (different object for robust testing)
+    const expectedRegisteredUser = new RegisteredUser({
       id: 'user-123',
       username: useCasePayload.username,
       fullname: useCasePayload.fullname,
@@ -45,18 +53,16 @@ describe('AddUserUseCase', () => {
     const registeredUser = await getUserUseCase.execute(useCasePayload);
 
     // Assert
-    expect(registeredUser).toStrictEqual(new RegisteredUser({
-      id: 'user-123',
-      username: useCasePayload.username,
-      fullname: useCasePayload.fullname,
-    }));
-
-    expect(mockUserRepository.verifyAvailableUsername).toBeCalledWith(useCasePayload.username);
-    expect(mockPasswordHash.hash).toBeCalledWith(useCasePayload.password);
-    expect(mockUserRepository.addUser).toBeCalledWith(new RegisterUser({
-      username: useCasePayload.username,
-      password: 'encrypted_password',
-      fullname: useCasePayload.fullname,
-    }));
+    expect(registeredUser).toStrictEqual(expectedRegisteredUser);
+    expect(mockUserRepository.verifyAvailableUsername)
+      .toBeCalledWith(useCasePayload.username);
+    expect(mockPasswordHash.hash)
+      .toBeCalledWith(useCasePayload.password);
+    expect(mockUserRepository.addUser)
+      .toBeCalledWith(new RegisterUser({
+        username: useCasePayload.username,
+        password: 'encrypted_password',
+        fullname: useCasePayload.fullname,
+      }));
   });
 });

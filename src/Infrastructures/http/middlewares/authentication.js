@@ -6,7 +6,7 @@ const authenticationMiddleware = (container) => async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      throw new AuthenticationError('missing authentication');
+      throw new AuthenticationError('Missing authentication');
     }
 
     const [scheme, token] = authHeader.split(' ');

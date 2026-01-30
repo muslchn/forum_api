@@ -13,7 +13,15 @@ describe('AddCommentUseCase', () => {
       owner: 'user-123',
     };
 
+    // Mock return value
     const mockAddedComment = new AddedComment({
+      id: 'comment-123',
+      content: useCasePayload.content,
+      owner: useCasePayload.owner,
+    });
+
+    // Expected value (different object for robust testing)
+    const expectedAddedComment = new AddedComment({
       id: 'comment-123',
       content: useCasePayload.content,
       owner: useCasePayload.owner,
@@ -34,7 +42,7 @@ describe('AddCommentUseCase', () => {
 
     const addedComment = await addCommentUseCase.execute(useCasePayload);
 
-    expect(addedComment).toStrictEqual(mockAddedComment);
+    expect(addedComment).toStrictEqual(expectedAddedComment);
     expect(mockThreadRepository.verifyThreadExists).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.addComment).toBeCalledWith(new NewComment(useCasePayload));
   });

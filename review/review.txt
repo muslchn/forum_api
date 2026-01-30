@@ -1,0 +1,52 @@
+Hasil Review
+Checklist
+
+Perlu diperbaiki
+Menerapkan Automation Testing
+
+Menerapkan Clean Architecture
+
+Terpenuhi
+API Dapat Menambahkan Thread
+
+API Dapat Menambahkan Komentar pada Thread
+
+API Dapat Menghapus Komentar pada Thread
+
+API Dapat Melihat Detail Thread
+
+Catatan dari Reviewer
+
+Hai muslchn! Terima kasih telah mengirimkan tugas submission sebagai syarat untuk melanjutkan pembelajaran. Project aplikasi yang kamu kirimkan sayangnya belum memenuhi seluruh kriteria yang ada. Masih terdapat beberapa catatan yang harus terpenuhi untuk menyelesaikan tugas submission. Yaitu: 
+
+Kamu sudah mengerjakan submission dengan baik, sayangnya pada kriteria automation testing masih terdapat beberapa kegagalan sebagai berikut
+
+ Test Files  4 failed | 34 passed (38)
+      Tests  13 failed | 101 passed (114)
+Dan juga pada penerapan clean architecture terdapat beberapa point yang bisa disesuaikan ya!
+Kamu dapat mengikuti beberapa saran di atas agar submission berikutnya dapat diterima dengan baik. 
+
+Berikut referensi modul berdasarkan saran di atas:
+
+Tips Dalam Mengerjakan Submission
+
+Tetap semangat ya! Jika kamu ada pertanyaan atau kendala dalam menerapkan beberapa saran di atas. Silakan tanyakan di forum diskusi kelas. Kami akan dengan senang hati membantu menjawabnya.
+
+Salam
+
+Dicoding Reviewer
+
+Catatan untuk file "src / Applications / use_case / GetThreadUseCase.js" baris 13
+Logika penentuan konten komentar yang dihapus (is_delete ? '**komentar telah dihapus**' : content) sebaiknya tidak dilakukan di use case ini, melainkan dipindahkan ke level domain (entity). Sesuai prinsip Clean Architecture, seluruh urusan bisnis harus disimpan di level domain. Kamu bisa membuat entity baru seperti CommentDetail yang menangani transformasi ini.
+
+Catatan untuk file "src / Applications / use_case / _test / AddCommentUseCase.test.js" baris 16
+Penggunaan mockAddedComment sebagai return value mock dan sekaligus sebagai expected value dalam assertion adalah anti-pattern. Jika objek yang di-mock sama persis dengan yang di-assert, test akan selalu pass meskipun ada bug di use case. Sebaiknya buat objek terpisah untuk mock return dan expected value.
+
+Catatan untuk file "src / Applications / use_case / _test / AddThreadUseCase.test.js" baris 15
+Penggunaan mockAddedThread sebagai return value mock dan sekaligus sebagai expected value dalam assertion adalah anti-pattern. Jika objek yang di-mock sama persis dengan yang di-assert, test akan selalu pass meskipun ada bug di use case. Sebaiknya buat objek terpisah untuk mock return dan expected value.
+
+Catatan untuk file "src / Applications / use_case / _test / AddUserUseCase.test.js" baris 20
+Penggunaan mockRegisteredUser sebagai return value mock dan sekaligus sebagai expected value dalam assertion adalah anti-pattern. Jika objek yang di-mock sama persis dengan yang di-assert, test akan selalu pass meskipun ada bug di use case. Sebaiknya buat objek terpisah untuk mock return dan expected value.
+
+Catatan untuk file "src / Applications / use_case / _test / LoginUserUseCase.test.js" baris 16
+Penggunaan mockedAuthentication.accessToken dan mockedAuthentication.refreshToken sebagai return value mock sekaligus membandingkannya dalam expected assertion bisa menyembunyikan bug. Sebaiknya gunakan nilai literal terpisah untuk mock return dan expected value agar test lebih robust.
