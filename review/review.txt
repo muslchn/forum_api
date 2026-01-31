@@ -2,11 +2,6 @@ Hasil Review
 Checklist
 
 Perlu diperbaiki
-Menerapkan Automation Testing
-
-Menerapkan Clean Architecture
-
-Terpenuhi
 API Dapat Menambahkan Thread
 
 API Dapat Menambahkan Komentar pada Thread
@@ -15,38 +10,189 @@ API Dapat Menghapus Komentar pada Thread
 
 API Dapat Melihat Detail Thread
 
+Menerapkan Automation Testing
+
+Menerapkan Clean Architecture
+
 Catatan dari Reviewer
 
 Hai muslchn! Terima kasih telah mengirimkan tugas submission sebagai syarat untuk melanjutkan pembelajaran. Project aplikasi yang kamu kirimkan sayangnya belum memenuhi seluruh kriteria yang ada. Masih terdapat beberapa catatan yang harus terpenuhi untuk menyelesaikan tugas submission. Yaitu: 
 
-Kamu sudah mengerjakan submission dengan baik, sayangnya pada kriteria automation testing masih terdapat beberapa kegagalan sebagai berikut
+Setelah diperiksa, masih terdapat kegagalan pada bagian pengujian [Mandatory]. Kriteria ini merupakan persyaratan wajib yang harus terpenuhi.
+[1] Add User with Valid Payload
+     Request: POST http://localhost:5000/users
+     Failures:
+       ✗ 1. should response with correct property and message | AssertionError: expected undefined to be an object
 
- Test Files  4 failed | 34 passed (38)
-      Tests  13 failed | 101 passed (114)
-Dan juga pada penerapan clean architecture terdapat beberapa point yang bisa disesuaikan ya!
-Kamu dapat mengikuti beberapa saran di atas agar submission berikutnya dapat diterima dengan baik. 
 
-Berikut referensi modul berdasarkan saran di atas:
+  [2] Add User with Exist Username
+     Request: POST http://localhost:5000/users
+     Failures:
+       ✗ 2. should response with correct property and message | AssertionError: expected 'Gagal menambahkan user. Username suda…' to equal 'username tidak tersedia'
 
-Tips Dalam Mengerjakan Submission
 
+  [3] Add User with Exist Username Copy
+     Request: POST http://localhost:5000/users
+     Failures:
+       ✗ 3. should response with correct property and message | AssertionError: expected 'Gagal menambahkan user. Username suda…' to equal 'tidak dapat membuat user baru karena …'
+
+
+  [4] Login with Invalid Username
+     Request: POST http://localhost:5000/authentications
+     Failures:
+       ✗ 4. should response 400 status code | AssertionError: expected response to have status code 400 but got 401
+
+
+  [5] Refresh Access Token with invalid Refresh Token
+     Request: PUT http://localhost:5000/authentications
+     Failures:
+       ✗ 5. should response with corrent message and property | AssertionError: expected 'Refresh token tidak valid' to equal 'refresh token tidak valid'
+
+
+  [6] Logout with Invalid Refresh Token
+     Request: DELETE http://localhost:5000/authentications
+     Failures:
+       ✗ 6. response should contain correct status and message | AssertionError: expected 'Refresh token tidak valid' to equal 'refresh token tidak ditemukan di data…'
+
+
+  [7] Add Thread with No Authentication
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 7. should response 401 status code | AssertionError: expected response to have status code 401 but got 404
+       ✗ 8. should show Missing Authentication message | AssertionError: expected 'Not Found' to equal 'Missing authentication'
+
+
+  [8] Add Thread with Bad Payload
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 9. should response 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 10. should show fail status and message | AssertionError: expected undefined to equal 'fail'
+
+
+  [9] Add Thread with Bad Payload
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 11. should response 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 12. should show fail status and message | AssertionError: expected undefined to equal 'fail'
+
+
+  [10] Add Thread with Bad Payload
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 13. should response 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 14. should show fail status and message | AssertionError: expected undefined to equal 'fail'
+
+
+  [11] Add Thread with Bad Payload
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 15. should response 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 16. should show fail status and message | AssertionError: expected undefined to equal 'fail'
+
+
+  [12] Add Thread with Bad Payload
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 17. should response 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 18. should show fail status and message | AssertionError: expected undefined to equal 'fail'
+
+
+  [13] Add Thread with Valid Payload
+     Request: POST http://localhost:5000/threads
+     Failures:
+       ✗ 19. should response 201 status code | AssertionError: expected response to have status code 201 but got 404
+       ✗ 20. should response with valid property and value | AssertionError: expected undefined to equal 'success'
+
+
+  [14] Add Comment with No Authentication
+     Request: POST http://localhost:5000/threads//comments
+     Failures:
+       ✗ 22. should response 401 status code | AssertionError: expected response to have status code 401 but got 404
+       ✗ 23. should show Missing Authentication message | AssertionError: expected 'Not Found' to equal 'Missing authentication'
+
+
+  [15] Add Comment with Not Found Thread
+     Request: POST http://localhost:5000/threads/xxx/comments
+     Failures:
+       ✗ 24. response should have correct property and value | AssertionError: expected undefined to equal 'fail'
+
+
+  [16] Add Comment with Invalid Payload
+     Request: POST http://localhost:5000/threads//comments
+     Failures:
+       ✗ 25. response should have 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 26. response should have correct property and value | AssertionError: expected undefined to equal 'fail'
+
+
+  [17] Add Comment with Invalid Payload
+     Request: POST http://localhost:5000/threads//comments
+     Failures:
+       ✗ 27. response should have 400 status code | AssertionError: expected response to have status code 400 but got 404
+       ✗ 28. response should have correct property and value | AssertionError: expected undefined to equal 'fail'
+
+
+  [18] Add Comment with User Johndoe
+     Request: POST http://localhost:5000/threads//comments
+     Failures:
+       ✗ 29. response should have 201 status code | AssertionError: expected response to have status code 201 but got 404
+       ✗ 30. response should have correct property and value | AssertionError: expected undefined to equal 'success'
+
+
+  [19] Add Comment with User Dicoding
+     Request: POST http://localhost:5000/threads//comments
+     Failures:
+       ✗ 31. response should have 201 status code | AssertionError: expected response to have status code 201 but got 404
+       ✗ 32. response should have correct property and value | AssertionError: expected undefined to equal 'success'
+
+
+  [20] Get Commented Thread
+     Request: GET http://localhost:5000/threads/
+     Failures:
+       ✗ 33. should response with status code 200 | AssertionError: expected response to have status code 200 but got 404
+       ✗ 34. should contain correct property and value | AssertionError: expected undefined to equal 'success'
+
+
+  [21] Delete Dicoding Comment with No Authentication
+     Request: DELETE http://localhost:5000/threads//comments/
+     Failures:
+       ✗ 35. should response 401 status code | AssertionError: expected response to have status code 401 but got 404
+       ✗ 36. should show Missing Authentication message | AssertionError: expected 'Not Found' to equal 'Missing authentication'
+
+
+  [22] Delete Not Found Comment
+     Request: DELETE http://localhost:5000/threads//comments/xxx
+     Failures:
+       ✗ 37. should show Missing Authentication message | AssertionError: expected undefined to equal 'fail'
+
+
+  [23] Delete Dicoding Comment with Using Johndoe
+     Request: DELETE http://localhost:5000/threads//comments/
+     Failures:
+       ✗ 38. should response 403 status code | AssertionError: expected response to have status code 403 but got 404
+       ✗ 39. should show Missing Authentication message | AssertionError: expected undefined to equal 'fail'
+
+
+  [24] Delete Dicoding Comment with Using Dicoding
+     Request: DELETE http://localhost:5000/threads//comments/
+     Failures:
+       ✗ 40. should response 200 status code | AssertionError: expected response to have status code 200 but got 404
+       ✗ 41. should show Missing Authentication message | AssertionError: expected undefined to equal 'success'
+
+
+  [25] Get Thread After Dicoding Comment Deleted
+     Request: GET http://localhost:5000/threads/
+     Failures:
+       ✗ 42. should response with status code 200 | AssertionError: expected response to have status code 200 but got 404
+       ✗ 43. should contain correct property and value | AssertionError: expected undefined to equal 'success'
+Rincian mengenai kegagalan tersebut dapat kamu temukan pada catatan code review di aplikasi submission. Harap periksa catatan tersebut dengan teliti, lakukan perbaikan, dan pastikan semua pengujian berhasil pada submission berikutnya.
 Tetap semangat ya! Jika kamu ada pertanyaan atau kendala dalam menerapkan beberapa saran di atas. Silakan tanyakan di forum diskusi kelas. Kami akan dengan senang hati membantu menjawabnya.
 
 Salam
 
 Dicoding Reviewer
 
-Catatan untuk file "src / Applications / use_case / GetThreadUseCase.js" baris 13
-Logika penentuan konten komentar yang dihapus (is_delete ? '**komentar telah dihapus**' : content) sebaiknya tidak dilakukan di use case ini, melainkan dipindahkan ke level domain (entity). Sesuai prinsip Clean Architecture, seluruh urusan bisnis harus disimpan di level domain. Kamu bisa membuat entity baru seperti CommentDetail yang menangani transformasi ini.
+Catatan untuk file "src / Infrastructures / http / createServer.js" baris 43:
+Semua endpoint /threads mengembalikan 404 Not Found. Masalahnya adalah 404 handler ini didefinisikan sebelum routes sempat terdaftar dengan benar,
 
-Catatan untuk file "src / Applications / use_case / _test / AddCommentUseCase.test.js" baris 16
-Penggunaan mockAddedComment sebagai return value mock dan sekaligus sebagai expected value dalam assertion adalah anti-pattern. Jika objek yang di-mock sama persis dengan yang di-assert, test akan selalu pass meskipun ada bug di use case. Sebaiknya buat objek terpisah untuk mock return dan expected value.
-
-Catatan untuk file "src / Applications / use_case / _test / AddThreadUseCase.test.js" baris 15
-Penggunaan mockAddedThread sebagai return value mock dan sekaligus sebagai expected value dalam assertion adalah anti-pattern. Jika objek yang di-mock sama persis dengan yang di-assert, test akan selalu pass meskipun ada bug di use case. Sebaiknya buat objek terpisah untuk mock return dan expected value.
-
-Catatan untuk file "src / Applications / use_case / _test / AddUserUseCase.test.js" baris 20
-Penggunaan mockRegisteredUser sebagai return value mock dan sekaligus sebagai expected value dalam assertion adalah anti-pattern. Jika objek yang di-mock sama persis dengan yang di-assert, test akan selalu pass meskipun ada bug di use case. Sebaiknya buat objek terpisah untuk mock return dan expected value.
-
-Catatan untuk file "src / Applications / use_case / _test / LoginUserUseCase.test.js" baris 16
-Penggunaan mockedAuthentication.accessToken dan mockedAuthentication.refreshToken sebagai return value mock sekaligus membandingkannya dalam expected assertion bisa menyembunyikan bug. Sebaiknya gunakan nilai literal terpisah untuk mock return dan expected value agar test lebih robust.
+Catatan untuk file "src / Interfaces / http / api / threads / handler.js" baris 16:
+Test menunjukkan semua POST /threads return 404 dengan pesan 'Not Found' bukan 'Missing authentication'. Ini berarti request tidak pernah sampai ke handler ini sama sekali karena routes tidak terdaftar dengan benar.

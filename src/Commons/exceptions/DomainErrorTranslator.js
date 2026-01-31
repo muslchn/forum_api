@@ -21,6 +21,10 @@ DomainErrorTranslator._directories = {
   'NEW_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat thread baru karena tipe data tidak sesuai'),
   'NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat komentar baru karena properti yang dibutuhkan tidak ada'),
   'NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat komentar baru karena tipe data tidak sesuai'),
+  'username tidak tersedia': new InvariantError('username tidak tersedia'),
+  'username tidak ditemukan': new InvariantError('username tidak ditemukan'),
+  'refresh token tidak valid': new InvariantError('refresh token tidak valid'),
+  'refresh token tidak ditemukan di database': new InvariantError('refresh token tidak ditemukan di database'),
 };
 
 export default DomainErrorTranslator;
