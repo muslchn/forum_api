@@ -46,6 +46,25 @@ describe('ThreadDetail entities', () => {
     expect(() => new ThreadDetail(payload)).toThrowError('THREAD_DETAIL.COMMENT_NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
+  it('should throw error when comment not contain needed property', () => {
+    const payload = {
+      id: 'thread-123',
+      title: 'thread title',
+      body: 'thread body',
+      date: '2021-08-08T07:19:09.775Z',
+      username: 'dicoding',
+      comments: [
+        {
+          id: 'comment-123',
+          username: 'dicoding',
+          date: '2021-08-08T07:22:33.555Z',
+        },
+      ],
+    };
+
+    expect(() => new ThreadDetail(payload)).toThrowError('THREAD_DETAIL.COMMENT_NOT_CONTAIN_NEEDED_PROPERTY');
+  });
+
   it('should create ThreadDetail object correctly', () => {
     const payload = {
       id: 'thread-123',

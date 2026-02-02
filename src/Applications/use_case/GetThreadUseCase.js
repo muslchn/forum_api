@@ -15,7 +15,7 @@ class GetThreadUseCase {
       const commentDetail = new CommentDetail({
         id: comment.id,
         content: comment.content,
-        date: comment.date instanceof Date ? comment.date.toISOString() : comment.date,
+        date: comment.date,
         username: comment.username,
         isDelete: comment.is_delete,
       });
@@ -30,7 +30,6 @@ class GetThreadUseCase {
 
     const threadDetail = new ThreadDetail({
       ...thread,
-      date: thread.date instanceof Date ? thread.date.toISOString() : thread.date,
       comments: mappedComments,
     });
 

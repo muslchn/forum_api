@@ -1,0 +1,7 @@
+Serialized Error: { statusCode: 400 }
+Test Files 3 failed | 35 passed (38)
+Tests 7 failed 107 passed (114)
+Start at 08:15:37
+Duration 1.31s (transform 336ms, setup 252ms, import 823ms, tests 1.14s, environment 3ms)
+FAIL Tests failed. Watching for file changes...
+press h to show help, press q to quit

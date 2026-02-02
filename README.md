@@ -5,8 +5,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5.0-blue)](https://expressjs.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
-[![Test Coverage](https://img.shields.io/badge/Coverage-94%25-brightgreen)](#-testing)
-[![Tests](https://img.shields.io/badge/Tests-108%2F114%20Passing-success)](#-testing)
+[![Test Coverage](https://img.shields.io/badge/Coverage-97%25-brightgreen)](#-testing)
+[![Tests](https://img.shields.io/badge/Tests-115~117%2F119%20Passing-success)](#-testing)
 [![API Tests](https://img.shields.io/badge/API%20Tests-85%2F85%20Passing-success)](#-api-documentation)
 [![License](https://img.shields.io/badge/License-ISC-yellow)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -1792,11 +1792,11 @@ Project Metrics (as of January 2026)
 Total Files:              150+
 Lines of Code:            ~8,000
 Test Files:               38
-Test Coverage:            94%
+Test Coverage:            97%
 API Endpoints:            12
 Database Tables:          4
 Dependencies:             15
-Documentation:            1,600+ lines
+Documentation:            1,800+ lines
 ```
 
 ---

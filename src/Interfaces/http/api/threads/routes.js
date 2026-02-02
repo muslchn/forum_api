@@ -1,12 +1,12 @@
 import express from 'express';
 
-const createThreadsRouter = (handler, authenticationMiddleware) => {
+const createThreadsRouter = (threadsHandler, commentsHandler, authenticationMiddleware) => {
   const router = express.Router();
 
-  router.post('/', authenticationMiddleware, handler.postThreadHandler);
-  router.post('/:threadId/comments', authenticationMiddleware, handler.postCommentHandler);
-  router.delete('/:threadId/comments/:commentId', authenticationMiddleware, handler.deleteCommentHandler);
-  router.get('/:threadId', handler.getThreadHandler);
+  router.post('/', authenticationMiddleware, threadsHandler.postThreadHandler);
+  router.post('/:threadId/comments', authenticationMiddleware, commentsHandler.postCommentHandler);
+  router.delete('/:threadId/comments/:commentId', authenticationMiddleware, commentsHandler.deleteCommentHandler);
+  router.get('/:threadId', threadsHandler.getThreadHandler);
 
   return router;
 };

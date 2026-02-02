@@ -6,6 +6,10 @@ import pool from '../../database/postgres/pool.js';
 import UserRepositoryPostgres from '../UserRepositoryPostgres.js';
 
 describe('UserRepositoryPostgres', () => {
+  beforeEach(async () => {
+    await UsersTableTestHelper.cleanTable();
+  });
+
   afterEach(async () => {
     await UsersTableTestHelper.cleanTable();
   });
@@ -89,12 +93,13 @@ describe('UserRepositoryPostgres', () => {
       // Arrange
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
       await UsersTableTestHelper.addUser({
-        username: 'dicoding',
+        id: 'user-pwd-test',
+        username: 'pwd_test_user',
         password: 'secret_password',
       });
 
       // Action & Assert
-      const password = await userRepositoryPostgres.getPasswordByUsername('dicoding');
+      const password = await userRepositoryPostgres.getPasswordByUsername('pwd_test_user');
       expect(password).toBe('secret_password');
     });
   });
