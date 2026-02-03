@@ -7,7 +7,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 [![Test Coverage](https://img.shields.io/badge/Coverage-97%25-brightgreen)](#-testing)
 [![Tests](https://img.shields.io/badge/Tests-115~117%2F119%20Passing-success)](#-testing)
-[![API Tests](https://img.shields.io/badge/API%20Tests-85%2F85%20Passing-success)](#-api-documentation)
+[![API Tests](https://img.shields.io/badge/API%20Tests-74%2F74%20Passing-success)](#-api-documentation)
 [![License](https://img.shields.io/badge/License-ISC-yellow)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Code Style](https://img.shields.io/badge/code%20style-eslint-blueviolet)](eslint.config.js)

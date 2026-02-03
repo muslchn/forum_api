@@ -13,8 +13,8 @@ Submission Info
 Student Name	Muslichin (muslchn)
 Course	Menjadi Back-End Developer Expert dengan JavaScript
 Submission	Proyek Automation Testing dan Clean Architecture Kirim Submission dan Review
-Submission ID	4537400
-Dikirim pada	Sabtu, 31 Januari 2026 - 16:12:58
+Submission ID	4539590
+Dikirim pada	Senin, 02 Februari 2026 - 18:16:37
 Tipe Enrollment	Subscription
 Student's Note
 
@@ -24,6 +24,8 @@ Hasil Review
 Checklist
 
 Perlu diperbaiki
+API Dapat Melihat Detail Thread
+
 Menerapkan Automation Testing
 
 Menerapkan Clean Architecture
@@ -35,15 +37,14 @@ API Dapat Menambahkan Komentar pada Thread
 
 API Dapat Menghapus Komentar pada Thread
 
-API Dapat Melihat Detail Thread
-
 Catatan dari Reviewer
 
 Hai muslchn! Terima kasih telah mengirimkan tugas submission sebagai syarat untuk melanjutkan pembelajaran. Project aplikasi yang kamu kirimkan sayangnya belum memenuhi seluruh kriteria yang ada. Masih terdapat beberapa catatan yang harus terpenuhi untuk menyelesaikan tugas submission. Yaitu: 
 
-Masih terdapat Automation Test yang gagal ketika dijalankan. Pastikan tidak ada pengujian yang gagal sebelum kamu kirimkan ya. dos-d101875827bfd7e369e15b3dbb1a298320260201081704.png
+Beberapa pengujian Mandatory tidak dapat dijalankan dengan baik seperti berikut: dos-daf3b786592997f82337a51e8e71fb0b20260203080448.png
 
-Penerapan Clean Architecture dan Automation Test masih kurang tepat. Cek komentar kode ya.
+Silakan periksa kembali setiap kriteria pastikan properti, pesan kembalian, dan response code sudah sesuai.
+
 
 Kamu dapat mengikuti beberapa saran di atas agar submission berikutnya dapat diterima dengan baik. 
 
@@ -53,32 +54,10 @@ Salam
 
 Dicoding Reviewer
 
-Catatan dari Reviewer pada Kode Program:
-
-File "src / Infrastructures / repository / CommentRepositoryPostgres.js" baris 49:
+Catatan untuk file "src / Infrastructures / repository / ThreadRepositoryPostgres.js" baris 38:
     if (!result.rowCount) {
-Hapus baris 49-51 karena fungsi verifyCommentOwner seharusnya hanya fokus terhadap pengecekan apakah user merupakan owner dari comment atau bukan. Pengecekan apakah comment ada atau tidak merupakan tugas dari fungsi verifyCommentExists. Jadi jika kamu membutuhkannya, kamu cukup memanggil fungsi tersebut di use case. Perlu diingat bahwa logika bisnis dan orkestrasi antar fungsi seharusnya dilakukan di use case ya
+Tidak perlu ada pengecekan thread di sini ya. Seharusnya ini tugas dari fungsi verifyThreadExists. Kamu cukup panggil fungsi tersebut di use case ya
 
-File "src / Applications / use_case / GetThreadUseCase.js" baris 18:
-        date: comment.date instanceof Date ? comment.date.toISOString() : comment.date,
-Ketika terdapat logika percabangan seperti ini, seharusnya kamu melakukan pengujian atas seluruh kemungkinan yang ada ya. Perbaiki dulu test yang kamu buat. Lakukan hal yang sama pada baris 33 ya.
-
-File "src / Infrastructures / repository / ThreadRepositoryPostgres.js" baris 38:
-    if (!result.rowCount) {
-Cek komentar pada file CommentRepositoryPostgres ya
-
-File "src / Domains / comments / entities / CommentDetail.js" baris 1:
-class CommentDetail {
-Kamu belum membuat test untuk file ini
-
-File "src / Infrastructures / repository / _test / CommentRepositoryPostgres.test.js" baris 162:
-      expect(comments[0].id).toEqual('comment-123');
-Seharusnya kamu melakukan assert atas nilai seluruh atribut yang dikembalikan ya. Kamu belum melakukan assert atas content, date, dan is_delete. Cek juga semua implementasi kode yang serupa ya.
-
-File "src / Domains / threads / entities / ThreadDetail.js" baris 35:
-        throw new Error('THREAD_DETAIL.COMMENT_NOT_CONTAIN_NEEDED_PROPERTY');
-baris ini belum ter-cover oleh test
-
-File "src / Interfaces / http / api / threads / handler.js" baris 1:
-import AddThreadUseCase from '../../../../Applications/use_case/AddThreadUseCase.js';
-Seharusnya kamu pisahkan file untuk handle fitur thread dan comment ya. Hal ini supaya kode kamu lebih bersih dan mudah dimaintain.
+Catatan untuk file "src / Domains / threads / entities / ThreadDetail.js" baris 30:
+      throw new Error('THREAD_DETAIL.NOT_MEET_DATA_TYPE_SPECIFICATION');
+Kamu belum mendaftarkan error ini ke domain translator error. Pastikan semua jenis error sudah kamu daftarkan ya.

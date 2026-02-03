@@ -1,0 +1,16 @@
+
+All Tests Passed (79) Failed (19) Skipped (0) Errors (0) Console Log
+Iteration 1
+GET Comments / Get Commented Thread http://localhost:5000/threads/thread-1Ct388CoTrsWx5E1qKWXs
+FAIL should response with status code 200 | AssertionError: expected response to have status code 200 but got 500 FAIL should contain correct property and value | AssertionError: expected 'error' to equal 'success'
+GET Comments / Get Thread After Dicoding Comment Deleted http://localhost:5000/threads/thread-1Ct388CoTrsWx5E1qKWXs
+FAIL should response with status code 200 | AssertionError: expected response to have status code 200 but got 500 FAIL should contain correct property and value | AssertionError: expected 'error' to equal 'success'
+Generate Tests
+View Summary
+500
+3 ms
+• 319 B. 2
+500
+2 ms
+• 319 B. 2
+1
