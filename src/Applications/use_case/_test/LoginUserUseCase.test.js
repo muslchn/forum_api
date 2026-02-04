@@ -17,10 +17,6 @@ describe('GetAuthenticationUseCase', () => {
     // Mock return values
     const mockAccessToken = 'access_token';
     const mockRefreshToken = 'refresh_token';
-    const mockedAuthentication = new NewAuth({
-      accessToken: mockAccessToken,
-      refreshToken: mockRefreshToken,
-    });
 
     // Expected values (literal values for assertions)
     const expectedAccessToken = 'access_token';

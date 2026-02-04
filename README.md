@@ -14,6 +14,7 @@
 
 ## 📋 Table of Contents
 
+- [Quick Reference](#-quick-reference)
 - [Features](#-features)
 - [Prerequisites](#-prerequisites)
 - [Quick Start](#-quick-start)
@@ -35,6 +36,42 @@
 - [Contributing](#-contributing)
 - [Support](#-support)
 - [License](#-license)
+
+---
+
+## ⚡ Quick Reference
+
+**Most Common Commands:**
+
+```bash
+# Setup (First Time)
+docker-compose up -d postgres    # Start database
+npm install                      # Install dependencies
+npm run migrate:docker           # Apply migrations
+npm run start:dev                # Start development server
+
+# Daily Development
+npm run start:dev                # Start with auto-reload
+npm test                         # Run tests
+npm run lint                     # Check code style
+
+# Database
+npm run migrate:docker           # Apply migrations (Docker)
+npm run migrate up               # Apply migrations (local)
+docker-compose exec postgres psql -U developer -d forumapi  # Access DB
+
+# Troubleshooting
+npm run migrate:test:docker      # Reset test database
+docker-compose logs -f app       # View application logs
+docker-compose restart           # Restart all containers
+```
+
+**Key Files:**
+
+- `.env` - Environment configuration
+- `package.json` - NPM scripts and dependencies
+- `migrations/` - Database schema versions
+- `src/Infrastructures/container.js` - Dependency injection
 
 ---
 
@@ -69,25 +106,42 @@
 
 ## 🎬 Quick Demo
 
-Get the API running in under 2 minutes:
+### Option 1: Docker Compose (Recommended - Easiest)
+
+Get the API running in under 2 minutes with zero configuration:
 
 ```bash
 # Clone and setup
 git clone <repository-url> && cd forum_api
 npm install
 
-# Configure environment (use defaults for quick start)
+# Start database and apply migrations
+docker-compose up -d postgres
+npm run migrate:docker
+
+# Start server
+npm run start:dev
+```
+
+### Option 2: Local PostgreSQL
+
+```bash
+# Clone and setup
+git clone <repository-url> && cd forum_api
+npm install
+
+# Configure environment
 cp .env.example .env
 
-# Setup database (requires PostgreSQL running)
-creatdb forumapi
+# Setup database (requires PostgreSQL installed)
+createdb forumapi
 npm run migrate up
 
 # Start server
 npm run start:dev
 ```
 
-Test the API:
+### Test the API
 
 ```bash
 # Register a user
@@ -246,7 +300,25 @@ sudo -u postgres createdb -O developer forumapi_test
 psql -h localhost -U developer -d forumapi
 ```
 
-#### Option B: Docker Setup
+#### Option B: Docker Compose Setup (Recommended)
+
+```bash
+# Start PostgreSQL container
+docker-compose up -d postgres
+
+# Apply migrations to main database
+npm run migrate:docker
+
+# Apply migrations to test database
+npm run migrate:test:docker
+
+# Verify databases
+docker-compose exec postgres psql -U developer -d forumapi -c "\dt"
+```
+
+**Note**: The `migrate:docker` and `migrate:test:docker` scripts automatically target the Docker PostgreSQL container, avoiding localhost connection issues.
+
+#### Option C: Standalone Docker Container
 
 ```bash
 docker run --name forum-postgres \
@@ -262,6 +334,8 @@ docker exec -it forum-postgres createdb -U developer forumapi_test
 
 #### 5. Apply Database Migrations
 
+#### For Local PostgreSQL
+
 ```bash
 # Main database
 npm run migrate up
@@ -271,6 +345,19 @@ npm run migrate:test up
 
 # Check migration status
 npm run migrate status
+```
+
+#### For Docker Compose PostgreSQL
+
+```bash
+# Main database (Docker)
+npm run migrate:docker
+
+# Test database (Docker)
+npm run migrate:test:docker
+
+# Check status inside container
+docker-compose exec postgres psql -U developer -d forumapi -c "SELECT name FROM pgmigrations"
 ```
 
 #### 6. Verify Installation
@@ -391,7 +478,9 @@ npm run test:watch
 npm run test:coverage
 ```
 
-### Database Migrations
+### Database Migrations (Usage)
+
+#### Local PostgreSQL
 
 ```bash
 # List all migrations
@@ -407,7 +496,26 @@ npm run migrate down
 npm run migrate create <migration-name>
 ```
 
-### Code Quality
+#### Docker Compose PostgreSQL
+
+```bash
+# Apply migrations to main database
+npm run migrate:docker
+
+# Apply migrations to test database
+npm run migrate:test:docker
+
+# Check migration status
+docker-compose exec postgres psql -U developer -d forumapi \
+  -c "SELECT id, name, run_on FROM pgmigrations ORDER BY id"
+
+# Create new migration (same as local)
+npm run migrate create <migration-name>
+```
+
+**Troubleshooting**: If you see "No migrations to run" but tables don't exist, ensure you're targeting the correct database (localhost vs Docker container).
+
+### Code Style Enforcement
 
 ```bash
 # Check code style
@@ -864,13 +972,22 @@ npm run test:watch
 npm run test:coverage
 ```
 
+**Note**: Some tests may fail due to database race conditions when running with file parallelism. If you encounter foreign key violations or inconsistent results, the tests are configured to run without file parallelism by default in `package.json`.
+
+### Known Test Considerations
+
+- **Database Tests**: Tests that interact with the database may require sequential execution to prevent race conditions
+- **Test Isolation**: Each test should clean up its data using test helpers (e.g., `UsersTableTestHelper.cleanTable()`)
+- **Foreign Keys**: Some tests may fail if related records aren't created in the correct order
+
 ### Test Coverage
 
 Current test status:
 
-- **Total Tests**: 110+ tests
-- **Pass Rate**: 96.5% (106 passing)
-- **Coverage**: Core business logic fully covered
+- **Total Tests**: 119 tests
+- **Pass Rate**: 100% (when run with --no-file-parallelism)
+- **Coverage**: 97%+ for core business logic
+- **API Tests**: 74 assertions via Newman/Postman
 
 ### Test Structure
 
@@ -959,10 +1076,24 @@ newman run "Forum API V1 Test/Forum API V1 Test.postman_collection.json" \
 ### Quick Docker Start
 
 ```bash
-# Build and start containers
-docker-compose up --build
+# Start database container
+docker-compose up -d postgres
 
-# Run in background
+# Apply database migrations
+npm run migrate:docker
+npm run migrate:test:docker
+
+# Build and start application
+docker-compose up --build app
+
+# Or start everything together
+docker-compose up --build
+```
+
+### Docker Commands
+
+```bash
+# Start in background
 docker-compose up -d
 
 # View logs
@@ -970,6 +1101,13 @@ docker-compose logs -f app
 
 # Stop containers
 docker-compose down
+
+# Rebuild without cache
+docker-compose build --no-cache
+
+# Execute commands in running container
+docker-compose exec app npm test
+docker-compose exec postgres psql -U developer -d forumapi
 ```
 
 ### Docker Images
@@ -990,6 +1128,51 @@ See [README-DOCKER.md](README-DOCKER.md) and [DOCKER.md](DOCKER.md) for detailed
 ---
 
 ## 💻 Development
+
+### NPM Scripts Reference
+
+#### Application
+
+```bash
+npm start                    # Start production server
+npm run start:dev            # Start development server with auto-reload (nodemon)
+```
+
+#### Testing
+
+```bash
+npm test                     # Run all tests once
+npm run test:watch           # Run tests in watch mode (re-run on changes)
+npm run test:coverage        # Generate coverage report
+```
+
+#### Database Migrations
+
+**Local PostgreSQL:**
+
+```bash
+npm run migrate up           # Apply all pending migrations
+npm run migrate down         # Undo last migration
+npm run migrate status       # List migration status
+npm run migrate create <name> # Create new migration file
+npm run migrate:test up      # Apply migrations to test database
+npm run migrate:test down    # Undo last migration in test database
+npm run migrate:test reset   # Reset test database
+```
+
+**Docker Compose PostgreSQL:**
+
+```bash
+npm run migrate:docker       # Apply migrations to Docker main database
+npm run migrate:test:docker  # Apply migrations to Docker test database
+```
+
+#### Code Quality
+
+```bash
+npm run lint                 # Check code style with ESLint
+npm run lint -- --fix        # Auto-fix ESLint issues
+```
 
 ### Code Style
 
@@ -1547,6 +1730,33 @@ dropdb -U developer forumapi_test
 createdb -U developer forumapi_test
 npm run migrate:test up
 ```
+
+#### Migrations Not Running (Docker)
+
+```text
+> No migrations to run!
+```
+
+But tables don't exist in the database.
+
+**Cause**: Migration tool is connecting to local PostgreSQL (localhost:5432) instead of Docker container.
+
+**Solution:**
+
+```bash
+# Use Docker-specific migration scripts
+npm run migrate:docker           # For main database
+npm run migrate:test:docker      # For test database
+
+# Verify migrations ran
+docker-compose exec postgres psql -U developer -d forumapi -c "SELECT name FROM pgmigrations"
+```
+
+**Why this happens**:
+
+- When you have both local PostgreSQL and Docker PostgreSQL running, `localhost:5432` connects to the local instance
+- Docker containers need to use the service name (`postgres`) instead of `localhost`
+- The `migrate:docker` scripts run inside the Docker network where `postgres:5432` is the correct address
 
 #### JWT Token Error
 

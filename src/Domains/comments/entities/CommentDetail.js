@@ -13,7 +13,7 @@ class CommentDetail {
   }
 
   _verifyPayload({
-    id, content, date, username, isDelete,
+    id, date, username, isDelete,
   }) {
     if (!id || !date || !username || isDelete === undefined) {
       throw new Error('COMMENT_DETAIL.NOT_CONTAIN_NEEDED_PROPERTY');

@@ -12,6 +12,8 @@
     "test:coverage": "vitest --coverage",
     "migrate": "node-pg-migrate",
     "migrate:test": "node-pg-migrate --envPath .test.env",
+    "migrate:docker": "docker compose run --rm --no-deps -e DATABASE_URL=postgresql://developer:supersecretpassword@postgres:5432/forumapi app npx node-pg-migrate up",
+    "migrate:test:docker": "docker compose run --rm --no-deps -e DATABASE_URL=postgresql://developer:supersecretpassword@postgres:5432/forumapi_test app npx node-pg-migrate up",
     "lint": "eslint ./"
   },
   "keywords": [],

@@ -14,6 +14,7 @@ describe('GetThreadUseCase', () => {
       username: 'dicoding',
     };
 
+    /* eslint-disable camelcase */
     const comments = [
       {
         id: 'comment-123',
@@ -30,6 +31,7 @@ describe('GetThreadUseCase', () => {
         is_delete: true,
       },
     ];
+    /* eslint-enable camelcase */
 
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();

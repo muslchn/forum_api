@@ -1,4 +1,4 @@
-
+/* eslint-disable camelcase */
 export const up = (pgm) => {
   pgm.createTable('comments', {
     id: {
@@ -32,6 +32,7 @@ export const up = (pgm) => {
     },
   });
 };
+/* eslint-enable camelcase */
 
 export const down = (pgm) => {
   pgm.dropTable('comments');
