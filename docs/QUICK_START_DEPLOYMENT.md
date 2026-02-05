@@ -1,18 +1,15 @@
-================================================================
-Forum API - Deployment Quick Start Guide
-================================================================
+# Forum API - Deployment Quick Start Guide
 
 Version: 2.0
 Last Updated: February 6, 2026
 Status: Production Ready
 
-================================================================
-HOW TO DEPLOY THIS APP
-================================================================
+## HOW TO DEPLOY THIS APP
 
 This is a 4-step process that takes about 15-20 minutes total.
 
 ### STEP 1: SET UP EC2 INSTANCE (AWS)
+
 ─────────────────────────────────────
 
 Time: 5-10 minutes
@@ -30,11 +27,13 @@ Time: 5-10 minutes
    - This is your EC2_HOST value (e.g., 54.123.45.67)
 
 3. SSH into instance:
+
    ```bash
    ssh -i /path/to/forum-api-deploy.pem ubuntu@<EC2_HOST>
    ```
 
 4. Install prerequisites:
+
    ```bash
    # Update system
    sudo apt update && sudo apt upgrade -y
@@ -52,6 +51,7 @@ Time: 5-10 minutes
    ```
 
 5. Set up database:
+
    ```bash
    # Start PostgreSQL
    sudo systemctl start postgresql
@@ -67,6 +67,7 @@ Time: 5-10 minutes
    ```
 
 6. Clone repository:
+
    ```bash
    git clone https://github.com/muslchn/forum_api.git /home/ubuntu/forum-api
    cd /home/ubuntu/forum-api
@@ -74,6 +75,7 @@ Time: 5-10 minutes
    ```
 
 7. Create .env file:
+
    ```bash
    export NODE_ENV=production
    export DB_HOST=localhost
@@ -100,17 +102,20 @@ Time: 5-10 minutes
    ```
 
 8. Run migrations:
+
    ```bash
    npm run migrate
    ```
 
 9. Test app:
+
    ```bash
    npm start
    # Ctrl+C to stop after verifying it starts
    ```
 
 10. Create systemd service:
+
     ```bash
     sudo tee /etc/systemd/system/forum-api.service > /dev/null << EOF
     [Unit]
@@ -138,17 +143,20 @@ Time: 5-10 minutes
     ```
 
 ### STEP 2: GENERATE SSH KEY FOR DEPLOYMENT
+
 ─────────────────────────────────────────
 
 Time: 2-3 minutes
 
 1. On your local machine, generate SSH key:
+
    ```bash
    ssh-keygen -t rsa -b 4096 -C "forum-api-deploy" \
      -f ~/.ssh/forum_api_deploy -N ""
    ```
 
 2. Add public key to EC2 authorized_keys:
+
    ```bash
    # Copy public key to clipboard
    cat ~/.ssh/forum_api_deploy.pub | pbcopy  # macOS
@@ -165,17 +173,19 @@ Time: 2-3 minutes
    ```
 
 3. Test SSH connection:
+
    ```bash
    ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST> "echo '✅ SSH OK'"
    ```
 
 ### STEP 3: ADD GITHUB SECRETS FOR CI/CD
+
 ─────────────────────────────────────────
 
 Time: 3-5 minutes
 
 1. Go to GitHub repository:
-   https://github.com/muslchn/forum_api
+   <https://github.com/muslchn/forum_api>
 
 2. Navigate to Settings → Secrets and variables → Actions
 
@@ -194,6 +204,7 @@ Time: 3-5 minutes
    **Secret 3: EC2_SSH_KEY**
    - Name: EC2_SSH_KEY
    - Value: Contents of ~/.ssh/forum_api_deploy
+
    ```bash
    cat ~/.ssh/forum_api_deploy
    # Copy entire output including:
@@ -201,6 +212,7 @@ Time: 3-5 minutes
    # [contents]
    # -----END RSA PRIVATE KEY-----
    ```
+
    - Paste entire value in the secret
    - Click "Add secret"
 
@@ -211,11 +223,13 @@ Time: 3-5 minutes
    - EC2_SSH_KEY
 
 ### STEP 4: DEPLOY AND VERIFY
+
 ─────────────────────────────
 
 Time: 5 minutes
 
 1. Deploy manually (recommended first time):
+
    ```bash
    # Go to GitHub repository: https://github.com/muslchn/forum_api
    # Click "Actions" tab
@@ -233,6 +247,7 @@ Time: 5 minutes
    - Final step shows health check (5 retries, 5 sec apart)
 
 3. Verify deployment success:
+
    ```bash
    # SSH into EC2
    ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST>
@@ -251,13 +266,16 @@ Time: 5 minutes
    ```
 
 4. Access from browser (optional):
-   ```
+
+   ```text
    http://<EC2_HOST>:5000
    # Should work if port 5000 is open in security group
    ```
 
 ================================================================
-AUTOMATIC DEPLOYMENT
+
+## AUTOMATIC DEPLOYMENT
+
 ================================================================
 
 After Step 4, deployments are AUTOMATIC:
@@ -274,10 +292,13 @@ After Step 4, deployments are AUTOMATIC:
 3. No manual steps needed - CI/CD fully automated!
 
 ================================================================
-MONITORING & MAINTENANCE
+
+## MONITORING & MAINTENANCE
+
 ================================================================
 
-### View deployment logs:
+### View deployment logs
+
 ```bash
 # On your local machine, check GitHub Actions
 https://github.com/muslchn/forum_api/actions
@@ -287,7 +308,8 @@ ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST>
 sudo journalctl -u forum-api -f  # Real-time logs
 ```
 
-### Manual server checks:
+### Manual server checks
+
 ```bash
 ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST>
 
@@ -308,20 +330,25 @@ df -h
 free -h
 ```
 
-### Automatic health checks:
+### Automatic health checks
+
 - GitHub Actions workflow runs health check after each deployment
 - If health check fails, deployment is marked as failed
 - Check logs for specific failure reason
 
 ================================================================
-TROUBLESHOOTING
+
+## TROUBLESHOOTING
+
 ================================================================
 
 ### Deployment fails with "missing server host"
+
 - Check EC2_HOST secret is set (not empty)
 - Verify GitHub Secrets in: Settings → Secrets and variables → Actions
 
 ### Can't SSH to EC2
+
 ```bash
 # Test SSH connection
 ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST> "echo test"
@@ -334,6 +361,7 @@ ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST> "echo test"
 ```
 
 ### Application won't start
+
 ```bash
 # SSH into EC2
 ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST>
@@ -350,6 +378,7 @@ npm start  # Try starting manually to see errors
 ```
 
 ### Database connection errors
+
 ```bash
 # Verify database is running
 sudo systemctl status postgresql
@@ -361,47 +390,57 @@ psql -h localhost -U developer -d forumapi
 cat /home/ubuntu/forum-api/.env | grep DB_
 ```
 
-### See full troubleshooting guide:
+### See full troubleshooting guide
+
 → docs/DEPLOYMENT_CHECKLIST.md
 
 ================================================================
-USEFUL COMMANDS
+
+## USEFUL COMMANDS
+
 ================================================================
 
-### SSH into EC2:
+### SSH into EC2
+
 ```bash
 ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST>
 ```
 
-### View SSH key:
+### View SSH key
+
 ```bash
 cat ~/.ssh/forum_api_deploy
 ```
 
-### Deploy immediately:
-```
+### Deploy immediately
+
+```text
 Go to: https://github.com/muslchn/forum_api/actions
 Click "Continuous Deployment"
 Click "Run workflow"
 ```
 
-### View deployment history:
-```
+### View deployment history
+
+```text
 https://github.com/muslchn/forum_api/actions/workflows/cd.yml
 ```
 
-### View deployment logs on EC2:
+### View deployment logs on EC2
+
 ```bash
 sudo journalctl -u forum-api -f
 ```
 
-### Restart application:
+### Restart application
+
 ```bash
 # On EC2:
 sudo systemctl restart forum-api
 ```
 
-### Rebuild and deploy:
+### Rebuild and deploy
+
 ```bash
 # Push code to main branch
 git push origin main
@@ -409,10 +448,13 @@ git push origin main
 ```
 
 ================================================================
-SECURITY REMINDERS
+
+## SECURITY REMINDERS
+
 ================================================================
 
 ✅ DO:
+
 - Keep SSH key secure (no backups in cloud)
 - Rotate SSH keys every 90 days
 - Monitor deployment logs regularly
@@ -420,6 +462,7 @@ SECURITY REMINDERS
 - Keep Node.js and dependencies updated
 
 ❌ DON'T:
+
 - Share SSH private key
 - Store SSH key in GitHub
 - Allow SSH from 0.0.0.0/0
@@ -427,7 +470,9 @@ SECURITY REMINDERS
 - Use weak secrets
 
 ================================================================
-NEXT STEPS
+
+## NEXT STEPS
+
 ================================================================
 
 1. ✅ Complete all 4 deployment steps above
@@ -438,6 +483,7 @@ NEXT STEPS
 6. ✅ After verification, submit to Dicoding review
 
 Questions? See:
+
 - docs/GITHUB_SECRETS_SETUP.md (detailed setup guide)
 - docs/DEPLOYMENT_CHECKLIST.md (troubleshooting)
 - .github/workflows/cd.yml (workflow definition)

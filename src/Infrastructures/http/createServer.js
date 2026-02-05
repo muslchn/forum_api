@@ -17,6 +17,14 @@ const createServer = async (container) => {
   const rateLimiter = createRateLimiter(isProduction ? 90 : 1000, 60 * 1000);
   app.use('/threads', rateLimiter);
 
+  // Health check endpoint for load balancers and quick verification
+  app.get('/health', (req, res) => {
+    res.status(200).json({
+      status: 'success',
+      message: 'ok',
+    });
+  });
+
   // Register routes
   console.log('Registering routes...');
   app.use('/users', users(container));

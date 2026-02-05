@@ -8,8 +8,9 @@ Continuous Deployment workflow to deploy to EC2.
 Version: 1.0
 Date: February 6, 2026
 
-================================================================
+```text
 PREREQUISITES
+
 ================================================================
 
 Before starting, you need:
@@ -18,8 +19,7 @@ Before starting, you need:
 ✅ SSH access to your EC2 instance
 ✅ Permissions to modify GitHub Secrets
 
-================================================================
-STEP 1: Generate SSH Key Pair
+## STEP 1: Generate SSH Key Pair
 ================================================================
 
 If you don't have an SSH key, generate one:
@@ -37,7 +37,8 @@ ls -la ~/.ssh/forum_api_deploy*
 # - forum_api_deploy.pub (public key)
 ```
 
-### File Permissions (IMPORTANT):
+```text
+File Permissions (IMPORTANT)
 
 ```bash
 # Set correct permissions
@@ -50,7 +51,8 @@ ls -la ~/.ssh/forum_api_deploy*
 # Public key should be: -rw-r--r-- (644)
 ```
 
-### View Private Key Content:
+```text
+View Private Key Content
 
 ```bash
 # Display private key for copying
@@ -62,9 +64,8 @@ cat ~/.ssh/forum_api_deploy
 # -----END RSA PRIVATE KEY-----
 ```
 
-================================================================
+```text
 STEP 2: Configure EC2 Instance
-================================================================
 
 ### 2A. Add Public Key to EC2:
 
@@ -85,7 +86,8 @@ chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
 
-### 2B. Verify SSH Connection:
+```text
+2B. Verify SSH Connection
 
 ```bash
 # Test connection (run from your local machine)
@@ -96,7 +98,8 @@ ssh -i ~/.ssh/forum_api_deploy ec2-user@<EC2_IP>
 # Exit with: exit
 ```
 
-### 2C. Create Application Directory:
+```text
+## 2C. Create Application Directory
 
 ```bash
 # On EC2 instance
@@ -112,7 +115,8 @@ git config user.name "Deploy Bot"
 git remote add origin https://github.com/muslchn/forum_api.git
 ```
 
-### 2D. Create System Service (Optional but Recommended):
+```text
+## 2D. Create System Service (Optional but Recommended)
 
 ```bash
 # Create systemd service file
@@ -151,11 +155,8 @@ sudo systemctl start forum-api
 sudo systemctl status forum-api
 ```
 
-================================================================
+```text
 STEP 3: Add GitHub Secrets
-================================================================
-
-### 3A. Navigate to GitHub Secrets:
 
 1. Open your GitHub repository
 2. Go to: Settings → Secrets and variables → Actions
@@ -163,24 +164,26 @@ STEP 3: Add GitHub Secrets
 
 ### 3B. Add Secret #1: EC2_HOST
 
-```
+```text
 Name: EC2_HOST
 Value: <your-ec2-public-ip>
 Example: 54.123.45.67
 ```
 
-### 3C. Add Secret #2: EC2_USER
+```text
+3C. Add Secret #2: EC2_USER
 
-```
+```text
 Name: EC2_USER
 Value: ec2-user
 ```
 
 (Or `ubuntu` if using Ubuntu AMI instead of Amazon Linux)
 
-### 3D. Add Secret #3: EC2_SSH_KEY
+```text
+3D. Add Secret #3: EC2_SSH_KEY
 
-```
+```text
 Name: EC2_SSH_KEY
 Value: (contents of ~/.ssh/forum_api_deploy)
 ```
@@ -197,20 +200,23 @@ cat ~/.ssh/forum_api_deploy           # Windows (copy manually)
 ```
 
 When pasting in GitHub:
+
 - ✅ Include the entire key with headers and footers
 - ✅ Include all newlines
 - ✅ Do NOT add extra whitespace before/after
 - ✅ Paste directly without modification
 
 Expected format:
-```
+
+```txt
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA...
 ... (many lines) ...
 -----END RSA PRIVATE KEY-----
 ```
 
-### 3E. Verify Secrets are Set:
+```text
+## 3E. Verify Secrets are Set
 
 1. Go to Settings → Secrets and variables → Actions
 2. You should see three secrets listed:
@@ -220,9 +226,7 @@ MIIEpAIBAAKCAQEA...
 
 (Secrets are masked and show as dots in the UI)
 
-================================================================
-STEP 4: Test Deployment
-================================================================
+## STEP 4: Test Deployment
 
 ### 4A. Manual Workflow Trigger:
 
@@ -240,7 +244,7 @@ STEP 4: Test Deployment
 
 Expected success output:
 
-```
+```text
 ✅ Checkout code
 ✅ Deploy to EC2
   ✅ Executing script with SSH
@@ -251,7 +255,9 @@ Expected success output:
   ✅ Verified deployment
 ```
 
-### 4C: Test if Deployment is Live:
+4C Test if Deployment is Live
+
+=============================
 
 ```bash
 # From your local machine
@@ -260,25 +266,31 @@ curl http://<EC2_IP>:5000/
 # Should return API response (not connection error)
 ```
 
-================================================================
 TROUBLESHOOTING
-================================================================
 
-### Error: "missing server host"
+===============
+
+Error: "missing server host"
+
+============================
 
 **Cause:** EC2_HOST secret is not set or is empty
 
 **Fix:**
+
 ```bash
 # Verify you added the secret correctly
 # Check for whitespace: EC2_HOST = "54.123.45.67" (no spaces around IP)
 ```
 
-### Error: "Permission denied (publickey)"
+Error: "Permission denied (publickey)"
+
+=====================================
 
 **Cause:** SSH key authentication failed
 
 **Verify:**
+
 1. Public key is in EC2's ~/.ssh/authorized_keys
 2. Private key in GitHub Secret matches public key
 3. Key permissions are correct (600 for private, 644 for public)
@@ -290,11 +302,14 @@ cat ~/.ssh/authorized_keys | grep -i forum_api
 # If your public key appears, it's added correctly
 ```
 
-### Error: "command not found: npm"
+Error: "command not found: npm"
+
+==============================
 
 **Cause:** Node.js/npm not installed on EC2
 
 **Fix on EC2:**
+
 ```bash
 curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
 sudo yum install -y nodejs
@@ -302,11 +317,14 @@ node --version
 npm --version
 ```
 
-### Error: "Permission denied" when restarting service
+Error: "Permission denied" when restarting service
+
+=================================================
 
 **Cause:** User doesn't have sudo privileges
 
 **Fix on EC2:**
+
 ```bash
 # Add user to sudoers
 sudo usermod -aG wheel ec2-user
@@ -318,11 +336,14 @@ sudo -l
 echo "ec2-user ALL=(ALL) NOPASSWD: /bin/systemctl" | sudo tee -a /etc/sudoers.d/forum-api
 ```
 
-### Error: "Connection timeout"
+Error: "Connection timeout"
+
+===========================
 
 **Cause:** EC2 security group blocks SSH
 
 **Fix:**
+
 1. Go to EC2 console
 2. Select your instance
 3. Click "Security" tab
@@ -330,11 +351,14 @@ echo "ec2-user ALL=(ALL) NOPASSWD: /bin/systemctl" | sudo tee -a /etc/sudoers.d/
 5. Edit inbound rules
 6. Allow SSH (port 22) from your IP or GitHub IPs
 
-### Error: "database connection failed"
+Error: "database connection failed"
+
+===================================
 
 **Cause:** Environment variables not set on EC2
 
 **Fix on EC2:**
+
 ```bash
 # Create .env file
 cd /home/ec2-user/forum-api
@@ -353,11 +377,13 @@ NODE_ENV=production
 sudo systemctl restart forum-api
 ```
 
-================================================================
 STEP 5: Monitor & Maintain
-================================================================
 
-### Daily Checks:
+=========================
+
+Daily Checks
+
+============
 
 ```bash
 # SSH into EC2
@@ -379,7 +405,9 @@ free -h
 curl http://localhost:5000/
 ```
 
-### Weekly Checks:
+Weekly Checks
+
+=============
 
 ```bash
 # Update system packages
@@ -392,7 +420,9 @@ openssl x509 -in /path/to/cert.pem -noout -dates
 pg_dump forumapi > backup_$(date +%Y%m%d).sql
 ```
 
-### Emergency Restart:
+Emergency Restart
+
+=================
 
 ```bash
 # SSH into EC2
@@ -408,11 +438,13 @@ sudo systemctl status forum-api
 sudo journalctl -u forum-api -f
 ```
 
-================================================================
 BEST PRACTICES
-================================================================
 
-### Security:
+==============
+
+Security
+
+========
 
 ✅ Use 4096-bit RSA keys minimum
 ✅ Never share private keys
@@ -423,7 +455,9 @@ BEST PRACTICES
 ✅ Use GitHub Secrets (not in code)
 ✅ Limit SSH key permissions (600)
 
-### Environment:
+Environment
+
+===========
 
 ✅ Use .env file for configuration
 ✅ Never hardcode secrets in code
@@ -431,7 +465,9 @@ BEST PRACTICES
 ✅ Test deployment in staging first
 ✅ Keep production .env file backed up
 
-### Monitoring:
+Monitoring
+
+==========
 
 ✅ Check deployment logs regularly
 ✅ Set up alerts for deployment failures
@@ -439,7 +475,9 @@ BEST PRACTICES
 ✅ Keep system packages updated
 ✅ Regular backup of database
 
-### Deployment:
+Deployment
+
+==========
 
 ✅ Always use version control
 ✅ Test locally before pushing
@@ -447,26 +485,38 @@ BEST PRACTICES
 ✅ Document breaking changes
 ✅ Have rollback plan
 
-================================================================
 QUICK REFERENCE
-================================================================
 
-### Required Secrets:
+===============
+
+Required Secrets
+
+================
+
 - EC2_HOST: Public IP or DNS of EC2
 - EC2_USER: SSH user (ec2-user or ubuntu)
 - EC2_SSH_KEY: Private key (4096-bit RSA)
 
-### EC2 SSH Connection:
+EC2 SSH Connection
+
+==================
+
 ```bash
 ssh -i ~/.ssh/forum_api_deploy ec2-user@<EC2_HOST>
 ```
 
-### GitHub Actions Workflow File:
+GitHub Actions Workflow File
+
+===========================
+
 - Location: .github/workflows/cd.yml
 - Trigger: Push to main branch
 - Action: appleboy/ssh-action
 
-### Service Commands:
+Service Commands
+
+================
+
 ```bash
 sudo systemctl start forum-api
 sudo systemctl stop forum-api
@@ -474,17 +524,17 @@ sudo systemctl restart forum-api
 sudo systemctl status forum-api
 ```
 
-### View Logs:
+View Logs
+
+=========
+
 ```bash
 sudo journalctl -u forum-api -f
 npm run logs  # if configured
 ```
 
-================================================================
+```text
 SUPPORT & HELP
-================================================================
-
-If you encounter issues:
 
 1. Check GitHub Actions logs (Actions tab → workflow → job logs)
 2. SSH into EC2 and check service logs

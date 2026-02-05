@@ -80,6 +80,7 @@ docker-compose restart           # Restart all containers
 - `src/Infrastructures/container.js` - Dependency injection
 
 **📚 Production Deployment Guides:**
+
 - [Quick Start Deployment](docs/QUICK_START_DEPLOYMENT.md) - Start here! (15-20 min setup)
 - [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md) - Troubleshooting and verification
 - [GitHub Secrets Setup](docs/GITHUB_SECRETS_SETUP.md) - Detailed SSH/EC2 configuration
@@ -1241,7 +1242,7 @@ For deploying this application to production on EC2 or any server:
 
 ### Deployment Architecture
 
-```
+```text
 Local Development
        ↓
     git push main
@@ -1264,7 +1265,7 @@ Production API
 ### Deployment Summary
 
 | Component | Technology | Purpose |
-|-----------|-----------|---------|
+| ----------- | ----------- | --------- |
 | **VCS** | GitHub | Code repository |
 | **CI/CD** | GitHub Actions | Automated deploy pipeline |
 | **Server** | AWS EC2 | Production hosting |
@@ -1275,6 +1276,7 @@ Production API
 ### Deployment Best Practices
 
 ✅ **Security:**
+
 - Use 4096-bit RSA SSH keys
 - Rotate keys every 90 days
 - Limit EC2 security group access
@@ -1282,6 +1284,7 @@ Production API
 - Enable HTTPS with TLS 1.2+
 
 ✅ **Reliability:**
+
 - Enable systemd service restart on failure
 - Setup monitoring and alerts
 - Maintain database backups
@@ -1289,6 +1292,7 @@ Production API
 - Keep dependencies updated
 
 ✅ **Performance:**
+
 - Use production Node.js build (npm ci --production)
 - Enable connection pooling
 - Configure rate limiting
@@ -1340,7 +1344,6 @@ For complete deployment instructions, see **[Quick Start Deployment Guide](docs/
 ---
 
 ## 💻 Development
-
 
 ### NPM Scripts Reference
 

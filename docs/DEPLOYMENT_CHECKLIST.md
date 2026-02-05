@@ -1,19 +1,15 @@
-================================================================
-Deployment Secrets & Configuration Checklist
-================================================================
+# Deployment Secrets & Configuration Checklist
 
 Use this checklist to verify your GitHub Secrets setup
 before running deployment workflows.
 
 Date: February 6, 2026
 
-================================================================
+```text
 PRE-DEPLOYMENT CHECKLIST
-================================================================
+========================
 
-### GitHub Secrets Setup:
-
-□ EC2_HOST is set
+GitHub Secrets Setup:
   - [ ] Secret exists in GitHub Actions settings
   - [ ] Value is not empty
   - [ ] Value is valid IP or DNS (e.g., 54.123.45.67)
@@ -31,9 +27,8 @@ PRE-DEPLOYMENT CHECKLIST
   - [ ] Complete key with all newlines included
   - [ ] No extra whitespace before/after headers
 
-### EC2 Instance Configuration:
-
-□ EC2 instance is running
+```text
+EC2 Instance Configuration:
   - [ ] Instance is in "running" state in AWS console
   - [ ] Security groups allow SSH (port 22) from GitHub IPs
   - [ ] Elastic IP is assigned (if using IP-based deployment)
@@ -70,26 +65,25 @@ PRE-DEPLOYMENT CHECKLIST
   - [ ] Database credentials in .env file
   - [ ] .env file is NOT tracked by git
 
-### Local Development:
-
-□ Code ready to push
+```text
+Local Development:
   - [ ] All tests passing locally
   - [ ] No uncommitted changes needed in deployment
   - [ ] Latest changes pushed to main branch
   - [ ] Branch protection rules satisfied
 
-================================================================
+```text
 STEP-BY-STEP VERIFICATION
-================================================================
+==========================
 
-### Step 1: Verify GitHub Secrets
+Step 1: Verify GitHub Secrets
 
 In your GitHub repository:
 
 1. Settings → Secrets and variables → Actions
 2. Check each secret:
 
-```
+```text
 ✓ EC2_HOST         (masked)
 ✓ EC2_USER         (masked)
 ✓ EC2_SSH_KEY      (masked)
@@ -97,9 +91,8 @@ In your GitHub repository:
 
 All three should be present and show as masked (dots).
 
-### Step 2: Test SSH Connection
-
-From your local machine:
+```text
+Step 2: Test SSH Connection
 
 ```bash
 # Test SSH connection
@@ -110,9 +103,8 @@ ssh -i ~/.ssh/forum_api_deploy -o ConnectTimeout=10 \
 # ✅ SSH Connection OK
 ```
 
-### Step 3: Verify EC2 Setup
-
-SSH into EC2 and run:
+```text
+Step 3: Verify EC2 Setup
 
 ```bash
 # Check directory structure
@@ -137,9 +129,8 @@ curl http://localhost:5000
 # Should return API response
 ```
 
-### Step 4: Test Deployment Workflow
-
-In GitHub:
+```text
+Step 4: Test Deployment Workflow
 
 1. Go to Actions tab
 2. Select "Continuous Deployment"
@@ -149,7 +140,7 @@ In GitHub:
 6. Monitor logs in real-time
 
 Expected workflow steps:
-```
+```text
 ✅ Checkout code
 ✅ Validate GitHub Secrets
 ✅ Deploy to EC2
@@ -162,11 +153,11 @@ Expected workflow steps:
 ✅ Notify deployment success
 ```
 
-================================================================
+```text
 COMMON ISSUES & FIXES
-================================================================
+=====================
 
-### Issue 1: "missing server host"
+Issue 1: "missing server host"
 
 **Symptoms:**
 - Error: "missing server host"
@@ -192,7 +183,8 @@ ping <EC2_HOST>  # Should respond
 
 ---
 
-### Issue 2: "Permission denied (publickey)"
+```text
+Issue 2: "Permission denied (publickey)"
 
 **Symptoms:**
 - Error: "Permission denied (publickey)"
@@ -210,24 +202,27 @@ cd ~/.ssh
 cat forum_api_deploy | head -1  # Should be: -----BEGIN RSA PRIVATE KEY-----
 ```
 
-2. Verify public key is on EC2:
+1. Verify public key is on EC2:
+
 ```bash
 # SSH via other method and check
 ssh -i /original/ec2/key ec2-user@<EC2_HOST>
 cat ~/.ssh/authorized_keys | grep -i forum_api
 ```
 
-3. Fix permissions on EC2:
+1. Fix permissions on EC2:
+
 ```bash
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
 
-4. If key doesn't match, generate new pair and re-add.
+1. If key doesn't match, generate new pair and re-add.
 
 ---
 
-### Issue 3: "Connection timeout"
+```text
+Issue 3: "Connection timeout"
 
 **Symptoms:**
 - Error: "Connect timeout"
@@ -251,7 +246,8 @@ ssh -i ~/.ssh/forum_api_deploy -v ec2-user@<EC2_HOST>
 
 ---
 
-### Issue 4: "command not found: npm"
+```text
+Issue 4: "command not found: npm"
 
 **Symptoms:**
 - Error: "npm: command not found"
@@ -271,7 +267,8 @@ npm --version
 
 ---
 
-### Issue 5: "database connection failed"
+```text
+Issue 5: "database connection failed"
 
 **Symptoms:**
 - Deployment succeeds but application won't start
@@ -286,12 +283,13 @@ cd /home/ec2-user/forum-api
 cat .env  # Verify PGHOST, PGUSER, PGPASSWORD
 ```
 
-3. Test database connection:
+1. Test database connection:
+
 ```bash
 psql -h localhost -U developer -d forumapi -c "SELECT 1"
 ```
 
-4. If database not accessible:
+1. If database not accessible:
    - Check PostgreSQL service: `sudo systemctl status postgresql`
    - Check database credentials
    - Check database exists: `psql -l`
@@ -299,7 +297,8 @@ psql -h localhost -U developer -d forumapi -c "SELECT 1"
 
 ---
 
-### Issue 6: "Service is not running"
+```text
+Issue 6: "Service is not running"
 
 **Symptoms:**
 - Health check fails
@@ -318,28 +317,30 @@ psql -h localhost -U developer -d forumapi -c "SELECT 1"
 sudo journalctl -u forum-api -n 50 --no-pager | tail -20
 ```
 
-3. Try starting service manually:
+1. Try starting service manually:
+
 ```bash
 cd /home/ec2-user/forum-api
 npm start
 # Watch for error messages
 ```
 
-4. Check Node version:
+1. Check Node version:
+
 ```bash
 node --version  # Should be v20.x or higher
 ```
 
-5. Run tests locally:
+1. Run tests locally:
+
 ```bash
 npm test
 ```
 
-================================================================
-SECURITY BEST PRACTICES
-================================================================
+## SECURITY BEST PRACTICES
 
 ✅ DO:
+
 - Use 4096-bit RSA keys minimum
 - Rotate SSH keys every 90 days
 - Store private key securely on local machine
@@ -352,6 +353,7 @@ SECURITY BEST PRACTICES
 - Regular backups of database
 
 ❌ DON'T:
+
 - Share private SSH keys
 - Commit .env or SSH keys to git
 - Use weak passwords or no passphrase
@@ -363,44 +365,49 @@ SECURITY BEST PRACTICES
 - Leave old SSH keys on systems
 - Forget to update security groups
 
-================================================================
-QUICK COMMANDS REFERENCE
-================================================================
+```text
+## QUICK COMMANDS REFERENCE
 
-### GitHub Secrets URL:
-```
+GitHub Secrets URL:
+```text
 https://github.com/muslchn/forum_api/settings/secrets/actions
 ```
 
-### Test SSH Connection:
+```text
+Test SSH Connection:
 ```bash
 ssh -i ~/.ssh/forum_api_deploy ec2-user@<EC2_HOST> "echo 'OK'"
 ```
 
-### View EC2 SSH Key:
+### View EC2 SSH Key
+
 ```bash
 cat ~/.ssh/forum_api_deploy | pbcopy  # macOS
 cat ~/.ssh/forum_api_deploy | xclip   # Linux
 ```
 
-### SSH into EC2:
+### SSH into EC2
+
 ```bash
 ssh -i ~/.ssh/forum_api_deploy ec2-user@<EC2_HOST>
 ```
 
-### View Deployment Logs:
+### View Deployment Logs
+
 ```bash
 # On EC2
 sudo journalctl -u forum-api -f  # Follow mode
 sudo journalctl -u forum-api -n 50  # Last 50 lines
 ```
 
-### Restart Service on EC2:
+```text
+Restart Service on EC2:
 ```bash
 sudo systemctl restart forum-api
 ```
 
-### Manual Deployment Test:
+### Manual Deployment Test
+
 ```bash
 cd /home/ec2-user/forum-api
 git pull origin main
@@ -409,9 +416,7 @@ npm run migrate
 sudo systemctl restart forum-api
 ```
 
-================================================================
-GETTING HELP
-================================================================
+## GETTING HELP
 
 If you're still having issues:
 
@@ -432,8 +437,8 @@ If you're still having issues:
    - npm debug: npm --debug ...
 
 5. Common resources:
-   - GitHub Actions: https://docs.github.com/actions
-   - Appleboy SSH Action: https://github.com/appleboy/ssh-action
-   - AWS EC2: https://docs.aws.amazon.com/ec2/
+   - GitHub Actions: <https://docs.github.com/actions>
+   - Appleboy SSH Action: <https://github.com/appleboy/ssh-action>
+   - AWS EC2: <https://docs.aws.amazon.com/ec2/>
 
 ================================================================

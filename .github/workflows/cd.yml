@@ -130,23 +130,44 @@ jobs:
             fi
             echo "✅ Service is running"
 
-            # Step 10: Health check
+            # Step 10: Health check with response validation
             echo "🏥 Running health check..."
+            HEALTH_CHECK_SUCCESS=false
             for i in {1..5}; do
-              if curl -s http://localhost:5000 > /dev/null; then
-                echo "✅ Health check passed"
-                break
+              # Fetch response with HTTP status code
+              RESPONSE=$(curl -fsS -w "\n%{http_code}" http://localhost:5000/health 2>/dev/null || echo -e "\n000")
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+              BODY=$(echo "$RESPONSE" | sed '$d')
+
+              # Validate HTTP 200
+              if [ "$HTTP_CODE" != "200" ]; then
+                if [ $i -lt 5 ]; then
+                  echo "⏳ HTTP $HTTP_CODE - Waiting... (attempt $i/5)"
+                  sleep 2
+                fi
+                continue
               fi
-              if [ $i -lt 5 ]; then
-                echo "⏳ Waiting... (attempt $i/5)"
-                sleep 2
+
+              # Validate JSON response contains status=success
+              if echo "$BODY" | grep -q '"status":"success"'; then
+                echo "✅ Health check passed (HTTP 200, valid response)"
+                HEALTH_CHECK_SUCCESS=true
+                break
               else
-                echo "❌ ERROR: Health check failed after 5 attempts"
-                echo "Recent logs:"
-                sudo journalctl -u forum-api -n 10 --no-pager
-                exit 1
+                echo "⚠️  HTTP 200 but invalid response: $BODY"
+                if [ $i -lt 5 ]; then
+                  echo "⏳ Retrying... (attempt $i/5)"
+                  sleep 2
+                fi
               fi
             done
+
+            if [ "$HEALTH_CHECK_SUCCESS" != "true" ]; then
+              echo "❌ ERROR: Health check failed after 5 attempts"
+              echo "Recent logs:"
+              sudo journalctl -u forum-api -n 15 --no-pager
+              exit 1
+            fi
 
             echo "🎉 Deployment completed successfully!"
 
