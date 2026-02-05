@@ -5,9 +5,9 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5.0-blue)](https://expressjs.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
-[![Test Coverage](https://img.shields.io/badge/Coverage-97%25-brightgreen)](#-testing)
-[![Tests](https://img.shields.io/badge/Tests-115~117%2F119%20Passing-success)](#-testing)
-[![API Tests](https://img.shields.io/badge/API%20Tests-74%2F74%20Passing-success)](#-api-documentation)
+[![Test Coverage](https://img.shields.io/badge/Coverage-high-brightgreen)](#-testing)
+[![Tests](https://img.shields.io/badge/Tests-passing-success)](#-testing)
+[![API Tests](https://img.shields.io/badge/API%20Tests-Postman%2FNewman-success)](#-api-documentation)
 [![License](https://img.shields.io/badge/License-ISC-yellow)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Code Style](https://img.shields.io/badge/code%20style-eslint-blueviolet)](eslint.config.js)
@@ -32,7 +32,7 @@
 - [Maintenance](#-maintenance)
 - [FAQ](#-faq)
 - [Version History](#-version-history)
-- [Troubleshooting](#-troubleshooting)
+- [Troubleshooting](#️-troubleshooting)
 - [Contributing](#-contributing)
 - [Support](#-support)
 - [License](#-license)
@@ -61,7 +61,7 @@ npm run migrate up               # Apply migrations (local)
 docker-compose exec postgres psql -U developer -d forumapi  # Access DB
 
 # Troubleshooting
-npm run migrate:test:docker      # Reset test database
+npm run migrate:test:docker      # Apply test DB migrations (Docker)
 docker-compose logs -f app       # View application logs
 docker-compose restart           # Restart all containers
 ```
@@ -83,7 +83,9 @@ docker-compose restart           # Restart all containers
 - ✅ **Authentication** - JWT-based authentication with access and refresh tokens
 - ✅ **Thread Management** - Create, retrieve, and manage discussion threads
 - ✅ **Comment System** - Add comments to threads with ownership verification
-- ✅ **Soft Delete** - Comments and threads support soft deletion with recovery capability
+- ✅ **Comment Likes** - Toggle likes with aggregated `likeCount`
+- ✅ **Replies** - Reply to comments and retrieve nested replies
+- ✅ **Soft Delete** - Comments and replies support soft deletion
 - ✅ **Authorization** - Role-based access control with ownership verification
 
 ### Technical Features
@@ -559,8 +561,9 @@ curl -X POST http://localhost:3000/threads \
 
 ### Using Postman
 
-- Import `Forum API V1 Test/Forum API V1 Test.postman_collection.json`
-- Import `Forum API V1 Test/Forum API V1 Test.postman_environment.json`
+- Import `Forum API V2 Test/Forum API V2 Test.postman_collection.json`
+- Import `Forum API V2 Test/Forum API V2 Test.postman_environment.json`
+- Ensure the API is running on port 5000 (or update the environment file)
 - Run the test suite
 
 ### Using REST Client Extension (VS Code)
@@ -692,7 +695,15 @@ Response: 200 OK
           "content": "Great thread!",
           "date": "2026-01-30T...",
           "username": "janedoe",
-          "isDeleted": false
+          "likeCount": 1,
+          "replies": [
+            {
+              "id": "reply-xxx",
+              "content": "Thanks!",
+              "date": "2026-01-30T...",
+              "username": "johndoe"
+            }
+          ]
         }
       ]
     }
@@ -736,7 +747,57 @@ Response: 200 OK
 {
   "status": "success"
 }
+
+### Reply Endpoints
+
+#### Add Reply
+
+```http
+POST /threads/{threadId}/comments/{commentId}/replies HTTP/1.1
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "content": "This is a reply"
+}
+
+Response: 201 Created
+{
+  "status": "success",
+  "data": {
+    "addedReply": {
+      "id": "reply-xxx",
+      "content": "This is a reply",
+      "owner": "user-xxx"
+    }
+  }
+}
 ```
+
+#### Delete Reply
+
+```http
+DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId} HTTP/1.1
+Authorization: Bearer <access-token>
+
+Response: 200 OK
+{
+  "status": "success"
+}
+```
+
+### Like Endpoints
+
+#### Toggle Comment Like
+
+```http
+PUT /threads/{threadId}/comments/{commentId}/likes HTTP/1.1
+Authorization: Bearer <access-token>
+
+Response: 200 OK
+{
+  "status": "success"
+}
 
 ### Error Responses
 
@@ -819,6 +880,11 @@ forum_api/
 │   │   │   └── entities/
 │   │   │       ├── NewComment.js
 │   │   │       └── AddedComment.js
+│   │   ├── replies/               # Reply domain
+│   │   │   ├── ReplyRepository.js
+│   │   │   └── entities/
+│   │   │       ├── NewReply.js
+│   │   │       └── AddedReply.js
 │   │   ├── users/                 # User domain
 │   │   └── authentications/       # Authentication domain
 │   ├── Infrastructures/           # External services/implementations
@@ -829,6 +895,7 @@ forum_api/
 │   │   ├── repository/            # Repository implementations
 │   │   │   ├── ThreadRepositoryPostgres.js
 │   │   │   ├── CommentRepositoryPostgres.js
+│   │   │   ├── ReplyRepositoryPostgres.js
 │   │   │   ├── UserRepositoryPostgres.js
 │   │   │   └── AuthenticationRepositoryPostgres.js
 │   │   ├── security/              # Security implementations
@@ -837,7 +904,8 @@ forum_api/
 │   │   └── http/                  # HTTP server setup
 │   │       ├── createServer.js
 │   │       ├── middlewares/
-│   │       │   └── authentication.js
+│   │       │   ├── authentication.js
+│   │       │   └── rateLimiter.js
 │   │       └── api/               # Route handlers
 │   │           ├── users/
 │   │           ├── authentications/
@@ -856,7 +924,9 @@ forum_api/
 │   ├── 1627983516963_create-table-users.js
 │   ├── 1627983555473_create-table-authentications.js
 │   ├── 1706620000000_create-table-threads.js
-│   └── 1706620001000_create-table-comments.js
+│   ├── 1706620001000_create-table-comments.js
+│   ├── 1706620002000_create-table-comment-likes.js
+│   └── 1706620003000_create-table-replies.js
 ├── tests/                         # Test utilities
 │   ├── UsersTableTestHelper.js
 │   ├── AuthenticationsTableTestHelper.js
@@ -866,9 +936,12 @@ forum_api/
 ├── config/                        # Configuration files
 │   └── database/
 │       └── test.json
-├── Forum API V1 Test/             # Postman tests
+├── Forum API V1 Test/             # Postman tests (base)
 │   ├── Forum API V1 Test.postman_collection.json
 │   └── Forum API V1 Test.postman_environment.json
+├── Forum API V2 Test/             # Postman tests (replies/likes)
+│   ├── Forum API V2 Test.postman_collection.json
+│   └── Forum API V2 Test.postman_environment.json
 ├── .env.example                   # Environment variables example
 ├── .env                           # Environment variables (git ignored)
 ├── .test.env                      # Test environment variables
@@ -984,10 +1057,9 @@ npm run test:coverage
 
 Current test status:
 
-- **Total Tests**: 119 tests
-- **Pass Rate**: 100% (when run with --no-file-parallelism)
-- **Coverage**: 97%+ for core business logic
-- **API Tests**: 74 assertions via Newman/Postman
+- **Pass Rate**: 100% (run with `--maxWorkers 1` if your local DB is sensitive to parallel tests)
+- **Coverage**: High coverage for core business logic
+- **API Tests**: Postman/Newman collections for V1 and V2
 
 ### Test Structure
 
@@ -1064,9 +1136,10 @@ Run Postman test collection:
 # Install Newman (Postman CLI)
 npm install -g newman
 
-# Run tests
-newman run "Forum API V1 Test/Forum API V1 Test.postman_collection.json" \
-  -e "Forum API V1 Test/Forum API V1 Test.postman_environment.json"
+# Run tests (V2 includes replies and likes)
+PORT=5000 npm start
+newman run "Forum API V2 Test/Forum API V2 Test.postman_collection.json" \
+  -e "Forum API V2 Test/Forum API V2 Test.postman_environment.json"
 ```
 
 ---
@@ -1311,7 +1384,7 @@ describe('MyEntity', () => {
 
 ---
 
-## � Security
+## 🔒 Security
 
 ### Best Practices Implemented
 
@@ -1320,7 +1393,7 @@ describe('MyEntity', () => {
 - ✅ **Input Validation** - Strict payload validation on all endpoints
 - ✅ **SQL Injection Protection** - Parameterized queries via pg library
 - ✅ **CORS Ready** - Configure in production as needed
-- ✅ **Rate Limiting Ready** - Implement with express-rate-limit
+- ✅ **Rate Limiting Enabled** - In-memory limiter on `/threads` (relaxed in non-prod)
 
 ### Security Checklist for Production
 
@@ -1328,39 +1401,22 @@ describe('MyEntity', () => {
 # 1. Use strong environment variables
 npm install dotenv-safe
 
-# 2. Add rate limiting
-npm install express-rate-limit
-
-# 3. Add CORS protection
+# 2. Add CORS protection
 npm install cors
 
-# 4. Add helmet for security headers
+# 3. Add helmet for security headers
 npm install helmet
 
-# 5. Validate all user inputs
+# 4. Validate all user inputs
 npm install joi
 
-# 6. Enable HTTPS in production
-# Update createServer.js to use helmet and cors
+# 5. Enable HTTPS in production (see docs/DEPLOYMENT.md)
 ```
 
-### Production Security Setup
+### Rate Limiting in Production
 
-```javascript
-// src/Infrastructures/http/createServer.js
-import helmet from 'helmet';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
-});
-
-app.use(helmet());
-app.use(cors({ origin: process.env.ALLOWED_ORIGINS }));
-app.use('/api/', limiter);
-```
+- App-level rate limiting is enabled for `/threads`.
+- For production, apply a stronger edge limiter (see `nginx.conf` and `docs/DEPLOYMENT.md`).
 
 ### Key Rotation
 
@@ -1628,7 +1684,7 @@ A: It provides:
 - Clear separation of concerns
 
 **Q: Can I add replies to comments?**  
-A: Yes, modify CommentRepositoryPostgres and add parent_comment_id to comments table.
+A: Yes, replies are supported via `/threads/{threadId}/comments/{commentId}/replies` and returned in thread detail responses.
 
 **Q: How do I implement search?**  
 A: Use PostgreSQL full-text search or add Elasticsearch for advanced features.
@@ -1651,6 +1707,12 @@ A: Yes! Update PGHOST and credentials for AWS RDS, Google Cloud SQL, etc.
 
 ## 📊 Version History
 
+### v1.1.0 (February 5, 2026)
+
+- ✅ Comment likes and `likeCount`
+- ✅ Reply endpoints and reply retrieval in thread details
+- ✅ Postman V2 collection support
+
 ### v1.0.0 (January 30, 2026)
 
 - ✅ User registration and authentication
@@ -1664,14 +1726,13 @@ A: Yes! Update PGHOST and credentials for AWS RDS, Google Cloud SQL, etc.
 
 ### Planned Features
 
-- [ ] v1.1.0 - Comment replies (nested comments)
 - [ ] v1.2.0 - Thread categories and tags
 - [ ] v1.3.0 - User roles and permissions
 - [ ] v2.0.0 - WebSocket real-time updates
 
 ---
 
-## �🔧 Troubleshooting
+## 🛠️ Troubleshooting
 
 ### Common Issues
 
@@ -1977,7 +2038,6 @@ Built with:
 
 ### Future Enhancements
 
-- [ ] Replies/nested comments system
 - [ ] Thread categories/tags
 - [ ] User roles and permissions
 - [ ] Comment editing and history
@@ -1986,7 +2046,6 @@ Built with:
 - [ ] Real-time updates with WebSocket
 - [ ] Notification system
 - [ ] User reputation system
-- [ ] API rate limiting
 - [ ] GraphQL API support
 - [ ] Internationalization (i18n)
 - [ ] Email notifications
@@ -1997,22 +2056,22 @@ Built with:
 ## 📊 Project Statistics
 
 ```text
-Project Metrics (as of January 2026)
+Project Metrics (as of February 2026)
 ═══════════════════════════════════════════
 Total Files:              150+
 Lines of Code:            ~8,000
 Test Files:               38
 Test Coverage:            97%
-API Endpoints:            12
-Database Tables:          4
+API Endpoints:            14+
+Database Tables:          6
 Dependencies:             15
-Documentation:            1,800+ lines
+Documentation:            2,000+ lines
 ```
 
 ---
 
-**Last Updated**: January 31, 2026  
-**Version**: 1.0.0  
+**Last Updated**: February 5, 2026  
+**Version**: 1.1.0  
 **Status**: ✅ Production Ready  
 **Maintainer**: Forum API Team
 

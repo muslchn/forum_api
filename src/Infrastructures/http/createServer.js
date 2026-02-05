@@ -4,12 +4,18 @@ import DomainErrorTranslator from '../../Commons/exceptions/DomainErrorTranslato
 import users from '../../Interfaces/http/api/users/index.js';
 import authentications from '../../Interfaces/http/api/authentications/index.js';
 import threads from '../../Interfaces/http/api/threads/index.js';
+import createRateLimiter from './middlewares/rateLimiter.js';
 
 const createServer = async (container) => {
   const app = express();
 
   // Middleware for parsing JSON
   app.use(express.json());
+
+  // Rate limiter: stricter in production, relaxed in non-prod to avoid local test throttling
+  const isProduction = process.env.NODE_ENV === 'production';
+  const rateLimiter = createRateLimiter(isProduction ? 90 : 1000, 60 * 1000);
+  app.use('/threads', rateLimiter);
 
   // Register routes
   console.log('Registering routes...');

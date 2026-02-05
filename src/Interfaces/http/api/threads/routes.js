@@ -5,10 +5,14 @@ const createThreadsRouter = (threadsHandler, commentsHandler, authenticationMidd
 
   router.post('/', authenticationMiddleware, threadsHandler.postThreadHandler);
   router.post('/:threadId/comments', authenticationMiddleware, commentsHandler.postCommentHandler);
+  router.post('/:threadId/comments/:commentId/replies', authenticationMiddleware, commentsHandler.postReplyHandler);
   router.delete('/:threadId/comments/:commentId', authenticationMiddleware, commentsHandler.deleteCommentHandler);
+  router.delete('/:threadId/comments/:commentId/replies/:replyId', authenticationMiddleware, commentsHandler.deleteReplyHandler);
+  router.put('/:threadId/comments/:commentId/likes', authenticationMiddleware, commentsHandler.putCommentLikeHandler);
   router.get('/:threadId', threadsHandler.getThreadHandler);
 
   return router;
 };
+
 
 export default createThreadsRouter;

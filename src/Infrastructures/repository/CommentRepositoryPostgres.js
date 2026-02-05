@@ -16,8 +16,10 @@ class CommentRepositoryPostgres extends CommentRepository {
     const date = new Date().toISOString();
 
     const query = {
-      text: 'INSERT INTO comments VALUES($1, $2, $3, $4, $5, $6) RETURNING id, content, owner',
-      values: [id, threadId, content, date, owner, false],
+      text: `INSERT INTO comments (id, thread_id, content, date, owner, is_delete, like_count)
+        VALUES($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id, content, owner`,
+      values: [id, threadId, content, date, owner, false, 0],
     };
 
     const result = await this._pool.query(query);
@@ -62,7 +64,7 @@ class CommentRepositoryPostgres extends CommentRepository {
 
   async getCommentsByThreadId(threadId) {
     const query = {
-      text: `SELECT comments.id, comments.content, comments.date, comments.is_delete, users.username
+      text: `SELECT comments.id, comments.content, comments.date, comments.is_delete, users.username, COALESCE(comments.like_count, 0) as like_count
         FROM comments
         LEFT JOIN users ON users.id = comments.owner
         WHERE comments.thread_id = $1
@@ -73,6 +75,71 @@ class CommentRepositoryPostgres extends CommentRepository {
     const result = await this._pool.query(query);
     return result.rows;
   }
+
+  async addCommentLike(commentId, userId) {
+    const id = `like-${this._idGenerator()}`;
+    const createdAt = new Date().toISOString();
+
+    const query = {
+      text: `INSERT INTO comment_likes (id, comment_id, user_id, created_at) 
+             VALUES($1, $2, $3, $4) 
+             ON CONFLICT (comment_id, user_id) DO NOTHING
+             RETURNING id`,
+      values: [id, commentId, userId, createdAt],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (result.rowCount > 0) {
+      // New like was added, increment like_count
+      await this._pool.query({
+        text: 'UPDATE comments SET like_count = like_count + 1 WHERE id = $1',
+        values: [commentId],
+      });
+    }
+
+    return result.rowCount > 0;
+  }
+
+  async removeCommentLike(commentId, userId) {
+    const query = {
+      text: 'DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2',
+      values: [commentId, userId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (result.rowCount > 0) {
+      // Like was removed, decrement like_count
+      await this._pool.query({
+        text: 'UPDATE comments SET like_count = GREATEST(like_count - 1, 0) WHERE id = $1',
+        values: [commentId],
+      });
+    }
+
+    return result.rowCount > 0;
+  }
+
+  async getCommentLikeByCommentIdAndUserId(commentId, userId) {
+    const query = {
+      text: 'SELECT id FROM comment_likes WHERE comment_id = $1 AND user_id = $2',
+      values: [commentId, userId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rowCount > 0;
+  }
+
+  async getCommentLikeCountByCommentId(commentId) {
+    const query = {
+      text: 'SELECT COALESCE(like_count, 0) as like_count FROM comments WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows[0]?.like_count || 0;
+  }
+
 }
 
 export default CommentRepositoryPostgres;

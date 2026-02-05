@@ -1,0 +1,42 @@
+
+Actions.dimasmd/auth-api. Git X +
+github.com/dimasmd/auth-api/actions/workflows/cd.yml
+Why GitHub?
+Team Enterprise Explore Marketplace Pricing
+<> Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+dimasmd/auth-api
+Workflows
+All workflows
+Continuous Deployment
+Continuous Deployment cd.yml
+Filter workflow runs
+Search
+Merge pull request #2 from dimasmd/feature-say-hello... Continuous Deployment #2: Commit 8abefбf pushed by dimasmd
+master
+Lo Continuous Integration
+2 workflow runs
+add cd action
+master
+Continuous Deployment #1: Commit e56cf9c pushed by dimasmds
+8
+Guest
+Sign in Sign up
+Notifications
+Star 0
+Fork 0
+Event▾ Status
+Branch
+Actor
+白
+22 days ago
+30s
+10
+22 days ago
+18s
