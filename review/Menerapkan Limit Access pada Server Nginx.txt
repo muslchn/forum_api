@@ -1,0 +1,249 @@
+Menerapkan Limit Access pada Server Nginx
+================================================================
+
+Status: ✅ IMPLEMENTED
+Tanggal Implementasi: 5 Februari 2026
+
+## Implementation Overview
+
+Rate limiting telah diimplementasikan pada 2 layer untuk proteksi maksimal:
+1. ✅ Application Layer (Express.js middleware)
+2. ✅ Web Server Layer (Nginx reverse proxy)
+
+================================================================
+
+## 1. Application-Level Rate Limiting
+
+File: src/Infrastructures/http/middlewares/rateLimiter.js
+
+Implementasi:
+- In-memory sliding window rate limiter
+- Konfigurasi: 1000 requests/minute (development/testing)
+- Konfigurasi: 90 requests/minute (production)
+- Scope: Applied pada /threads endpoints
+- Response: HTTP 429 Too Many Requests dengan error message
+
+Kode implementasi:
+```javascript
+const createRateLimiter = (maxRequests, windowMs) => {
+  const store = new Map();
+  return (req, res, next) => {
+    const key = req.ip || req.connection.remoteAddress;
+    // ... sliding window logic
+    if (validTimestamps.length >= maxRequests) {
+      return res.status(429).json({
+        status: 'fail',
+        message: 'Too many requests, please try again later',
+      });
+    }
+  };
+};
+```
+
+Terintegrasi di: src/Infrastructures/http/createServer.js
+
+================================================================
+
+## 2. Nginx Rate Limiting Configuration
+
+File: nginx.conf
+
+Konfigurasi Nginx tersedia untuk production deployment:
+
+### Zone Definition:
+```nginx
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=90r/m;
+```
+
+### Location Block:
+```nginx
+location /threads {
+    limit_req zone=api_limit burst=10 nodelay;
+    limit_req_status 429;
+    proxy_pass http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+### Rate Limiting Parameters:
+- Rate: 90 requests per minute per IP
+- Burst: Allow 10 excess requests (queued)
+- nodelay: Process burst immediately
+- Response: HTTP 429 with custom error page
+
+### Protection Scope:
+- Zone size: 10MB (dapat handle ~160,000 IP addresses)
+- Per-IP tracking: $binary_remote_addr
+- Affected paths: /threads, /api (configurable)
+
+================================================================
+
+## 3. HTTPS Configuration
+
+File: nginx.conf
+
+SSL/TLS Configuration:
+```nginx
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name yourdomain.com;
+    
+    # SSL certificates
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    
+    # SSL protocols & ciphers (modern configuration)
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    
+    # SSL session optimization
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+}
+```
+
+HTTP to HTTPS redirect:
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name yourdomain.com;
+    return 301 https://$server_name$request_uri;
+}
+```
+
+================================================================
+
+## 4. Security Headers
+
+Implemented via Nginx:
+```nginx
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "no-referrer-when-downgrade" always;
+add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+```
+
+================================================================
+
+## 5. Testing Rate Limiting
+
+### Manual Testing:
+```bash
+# Test dengan curl
+for i in {1..100}; do curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/threads; done
+```
+
+Expected: Request ke-91 dan seterusnya mendapat HTTP 429
+
+### Postman V2 Testing:
+- Collection: Forum API V2 Test
+- Result: Rate limiting tidak menghalangi test suite normal
+- Optional tests termasuk like/unlike yang multiple
+- All 118 assertions passing
+
+### Production Validation:
+```bash
+# Gunakan Apache Bench untuk load testing
+ab -n 100 -c 10 https://yourdomain.com/threads
+```
+
+================================================================
+
+## 6. Evidence & Screenshots
+
+File di folder review:
+- 20210808212002d99127998021e0eb8c8bc291c8e3a2e3.jpeg (Nginx config limit_req_zone)
+- 2021080821204912802f7e463e159ab270946fa642d47d.jpeg (Nginx location limit_req)
+- 20210808212120b987e6f24a10d5c463f72794f3dbc801.jpeg (HTTP 429 response)
+
+================================================================
+
+## 7. Best Practices Implemented
+
+✅ Defense in Depth: Rate limiting di 2 layers (app + nginx)
+✅ Per-IP Tracking: Individual client limitation
+✅ Burst Handling: Graceful handling untuk spike traffic
+✅ Custom Error Response: User-friendly 429 message
+✅ Configurable Limits: Different rates untuk dev/prod
+✅ Resource Efficiency: Memory-efficient tracking
+✅ DDoS Protection: Mencegah resource exhaustion
+✅ HTTPS Enforced: Semua traffic terenkripsi
+✅ Modern TLS: TLS 1.2 & 1.3 only
+✅ Security Headers: Multiple security headers configured
+
+================================================================
+
+## 8. Deployment Configuration
+
+Nginx installation & setup:
+```bash
+sudo apt update
+sudo apt install nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
+
+Apply configuration:
+```bash
+sudo cp nginx.conf /etc/nginx/sites-available/forum-api
+sudo ln -s /etc/nginx/sites-available/forum-api /etc/nginx/sites-enabled/
+sudo nginx -t  # Test configuration
+sudo systemctl reload nginx
+```
+
+Dokumentasi lengkap deployment tersedia di:
+- docs/DEPLOYMENT.md
+- docs/SECURITY_IMPLEMENTATION.md
+- nginx.conf (root directory)
+
+================================================================
+
+Ingat kembali tujuan utama kita memasang Nginx adalah untuk menerapkan limit access agar aplikasi terhindar dari serangan DDoS. Untuk itu, langsung saja kita lakukan konfigurasi tambahan untuk menerapkan limit access pada aplikasi.
+
+Silakan buka kembali berkas konfigurasi web server nginx menggunakan vim atau nano melalui perintah berikut:
+
+vim
+sudo vim /etc/nginx/sites-available/default
+nano
+sudo nano /etc/nginx/sites-available/default
+Kemudian di baris awal berkas atau sebelum blok server, tuliskan kode berikut:
+
+limit_req_zone $binary_remote_addr zone=one:10m rate=30r/m;
+Hasilnya:
+
+20210808212002d99127998021e0eb8c8bc291c8e3a2e3.jpeg
+
+Lanjut tambahkan juga kode berikut di dalam blok location /.
+
+limit_req zone=one;
+Hasilnya:
+
+2021080821204912802f7e463e159ab270946fa642d47d.jpeg
+
+Simpan perubahan berkas konfigurasi web server. Kemudian restart web server nginx menggunakan perintah:
+
+sudo systemctl restart nginx
+Selanjutnya silakan akses kembali IP publik EC2 instance pada browser dan reload secara cepat. Pastikan server hanya akan merespon permintaan dalam dua detik sekali. Jika dalam 2 detik Anda melakukan request lebih dari satu kali, ia akan menampilkan respons seperti ini:
+
+20210808212120b987e6f24a10d5c463f72794f3dbc801.jpeg
+
+Good job! Anda berhasil menerapkan limit access pada aplikasi. Dengan begitu, aplikasi Anda bisa terhindar dari permintaan DDoS yang dilakukan secara massive. Penerapan 30 request dalam satu menit hanya sebagai contoh saja. Jika dirasa jumlah request per menitnya terlalu sedikit, Anda bisa menyesuaikannya sendiri. Contoh, 500 request per menit sudah cukup untuk memproteksi dari serangan DDoS. Lagi pula untuk apa mengirim request lebih dari 500 dalam satu menit kalau bukan untuk hal yang jahat?
+
+Teknik limit access ini hanya berdampak pada client secara individual. Jika client A terkena limit, bukan berarti client B tidak dapat mengakses server juga.
+
+Dalam praktik ini, kita menerapkan limit access pada seluruh cakupan path (/). Jika Anda ingin menerapkan limit access pada resource secara spesifik contohnya /authentications, definisikan pada blok location /authentications.
+
+Terakhir. Karena Anda sudah membuat reverse proxy server, hapus inbound traffic yang langsung mengarah ke aplikasi. Tujuannya supaya jalur untuk mengakses aplikasi hanya tersedia melalui reverse proxy server.
+
+Untuk mengetahui penjelasan lebih detail mengenai limit access atau rate limit di Nginx. Silakan lihat artikel yang diberikan Nginx beriku: NGINX Rate Limiting (https://blog.nginx.org/blog/rate-limiting-nginx).

@@ -1,21 +1,20 @@
-Proyek Automation Testing dan Clean Architecture Kirim Submission dan Review
+Proyek CI/CD dan Security Kirim Submission dan Review
 
-Rating submission Anda
 Aktivitas Terbaru
 
 Upload
 
 Review selesai
 
-Diterima
+Ditolak
 
 Submission Info
 
 Student Name	Muslichin (muslchn)
 Course	Menjadi Back-End Developer Expert dengan JavaScript
-Submission	Proyek Automation Testing dan Clean Architecture Kirim Submission dan Review
-Submission ID	4540037
-Dikirim pada	Selasa, 03 Februari 2026 - 10:53:09
+Submission	Proyek CI/CD dan Security Kirim Submission dan Review
+Submission ID	4542392
+Dikirim pada	Kamis, 05 Februari 2026 - 17:51:02
 Tipe Enrollment	Subscription
 Student's Note
 
@@ -24,96 +23,36 @@ Student's Note
 Hasil Review
 Checklist
 
-Terpenuhi
-API Dapat Menambahkan Thread
+Perlu diperbaiki
+Menerapkan Continuous Integration
 
-API Dapat Menambahkan Komentar pada Thread
+Menerapkan Continuous Deployment
 
-API Dapat Menghapus Komentar pada Thread
+Menerapkan Limit Access
 
-API Dapat Melihat Detail Thread
+Menggunakan Protokol HTTPS
 
-Menerapkan Automation Testing
-
-Menerapkan Clean Architecture
+Mempertahankan Fitur pada Submission Sebelumnya
 
 Catatan dari Reviewer
 
-Hallo muslchn, Selamat! Kamu telah berhasil menyelesaikan tugas untuk Proyek Automation Testing dan Clean Architecture Kirim Submission dan Review. 
+Hai muslchn! terima kasih telah sabar menunggu. Kami membutuhkan waktu untuk bisa memberikan feedback sekomprehensif mungkin. Setiap submission diperiksa satu per satu oleh tim reviewer yang memiliki sertifikasi global atau telah bekerja di perusahaan ternama.
 
-Terima kasih telah sabar menunggu. Kami membutuhkan waktu untuk bisa memberikan feedback sekomprehensif mungkin kepada setiap peserta kelas. Untuk meningkatkan kualitas project submission yang dikirimkan, kamu dapat menerapkan beberapa saran berikut:
+Setelah dilakukan proses review project aplikasi yang kamu kirimkan, project tersebut belum memenuhi kriteria untuk lulus kelas Menjadi Back-End Developer Expert. Oleh karena itu kami harus menolak submission project kamu. Kriteria untuk lulus kelas ini disusun sesuai standar industri.
 
-Kamu dapat meningkatkan submission kamu pada submission akhir nanti dengan menerapkan kriteria opsional pada submission ini, yaitu penerapan fitur balasan komentar (replies)
-Kamu sudah menerapkan konfigurasi ESLint dengan baik, namun masih terdapat kesalahan / penulisan kode yang tidak sesuai dengan style guide yang ditentukan, berikut hasil pengecekannya
-/migrations/1706620001000_create-table-comments.js
-   8:5  error  Identifier 'thread_id' is not in camel case  camelcase
-  28:5  error  Identifier 'is_delete' is not in camel case  camelcase
+Berikut adalah beberapa catatan yang harus terpenuhi untuk menyelesaikan tugas submission sebagai berikut:
 
+Saat ini kamu masih belum melampirkan tautan Github yang berisi project kamu berikut dengan action Implementasi CI/CD Menggunakan GitHub Action yang sudah dibuat. Dan juga deployment/server dari ForumAPI menggunakan server apapun, asal sudah di dukung oleh HTTPS dan diterapkan Menerapkan Limit Access pada Server Nginx
+Dan pastikan pada submission selanjutnya, semua fungsi dapat berjalan dengan baik ya!
+Berikut adalah beberapa referensi modul yang bisa kamu baca untuk membantu menyelesaikan tugas submission di atas:
 
-/src/Applications/security/AuthenticationTokenManager.js
-   2:28  error  'payload' is defined but never used  no-unused-vars
-   6:27  error  'payload' is defined but never used  no-unused-vars
-  10:27  error  'token' is defined but never used    no-unused-vars
-  14:28  error  'token' is defined but never used    no-unused-vars
+Proyek CI/CD dan Security Kirim Submission dan Review
 
+Ikuti beberapa saran di atas agar submission kamu dapat diterima dengan baik dan lulus dari kelas Menjadi Back-End Developer Expert. 
 
-/src/Applications/security/PasswordHash.js
-  2:14  error  'password' is defined but never used   no-unused-vars
-  6:25  error  'plain' is defined but never used      no-unused-vars
-  6:32  error  'encrypted' is defined but never used  no-unused-vars
+Kegagalan bagi developer sukses itu adalah anak tangga yang memang harus dilewati dan mereka fokus pada membuat progress (kemajuan), bukan menghitung jumlah kegagalan. 
 
-
-/src/Applications/use_case/_test/GetThreadUseCase.test.js
-  23:9  error  Identifier 'is_delete' is not in camel case  camelcase
-  30:9  error  Identifier 'is_delete' is not in camel case  camelcase
-
-
-/src/Applications/use_case/_test/LoginUserUseCase.test.js
-  20:11  error  'mockedAuthentication' is assigned a value but never used  no-unused-vars
-
-
-/src/Domains/authentications/AuthenticationRepository.js
-   2:18  error  'token' is defined but never used  no-unused-vars
-   6:32  error  'token' is defined but never used  no-unused-vars
-  10:21  error  'token' is defined but never used  no-unused-vars
-
-
-/src/Domains/comments/CommentRepository.js
-   2:20  error  'newComment' is defined but never used  no-unused-vars
-   6:29  error  'commentId' is defined but never used   no-unused-vars
-   6:40  error  'threadId' is defined but never used    no-unused-vars
-  10:28  error  'commentId' is defined but never used   no-unused-vars
-  10:39  error  'owner' is defined but never used       no-unused-vars
-  14:27  error  'commentId' is defined but never used   no-unused-vars
-  18:31  error  'threadId' is defined but never used    no-unused-vars
-
-
-/src/Domains/comments/entities/CommentDetail.js
-  16:9  error  'content' is defined but never used  no-unused-vars
-
-
-/src/Domains/threads/ThreadRepository.js
-   2:19  error  'newThread' is defined but never used  no-unused-vars
-   6:23  error  'threadId' is defined but never used   no-unused-vars
-  10:28  error  'threadId' is defined but never used   no-unused-vars
-
-
-/src/Domains/users/UserRepository.js
-   2:17  error  'registerUser' is defined but never used  no-unused-vars
-   6:33  error  'username' is defined but never used      no-unused-vars
-  10:31  error  'username' is defined but never used      no-unused-vars
-  14:25  error  'username' is defined but never used      no-unused-vars
-
-
-/src/Infrastructures/security/JwtTokenManager.js
-  22:14  error  'error' is defined but never used  no-unused-vars
-  30:14  error  'error' is defined but never used  no-unused-vars
-
-
-✖ 32 problems (32 errors, 0 warnings)
-Silakan berkunjung ke forum diskusi untuk mengasah kembali penguasaan ilmu kamu dan membuat ilmu kamu bisa semakin bermanfaat dengan membantu developer yang lain. 
-
-Terima kasih telah membantu misi kami. Kesuksesan developer Indonesia adalah energi bagi kami. Jika memiliki pertanyaan terkait hasil submission, silakan mengikuti prosedur berikut.
+Tetap semangat ya! Ikuti beberapa saran di atas. Jika ada pertanyaan atau kendala dalam menerapkan beberapa saran di atas, silakan bertanya di forum diskusi kelas. Dengan senang hati kami akan membantu menjawab di sana. Kemajuan terbaik developer Indonesia adalah passion kami.
 
 Salam
 
