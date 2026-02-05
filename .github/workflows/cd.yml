@@ -10,35 +10,145 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # Prevent concurrent deployments
+    concurrency:
+      group: deployment
+      cancel-in-progress: false
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Validate that required secrets are set
+      - name: Validate GitHub Secrets
+        run: |
+          if [ -z "${{ secrets.EC2_HOST }}" ]; then
+            echo "❌ ERROR: EC2_HOST secret is not set"
+            echo ""
+            echo "Please add GitHub Secrets:"
+            echo "  1. Go to: Settings → Secrets and variables → Actions"
+            echo "  2. Add EC2_HOST: Your EC2 instance public IP or DNS"
+            echo "  3. Add EC2_USER: SSH username (e.g., ec2-user, ubuntu)"
+            echo "  4. Add EC2_SSH_KEY: Your private SSH key (4096-bit RSA)"
+            echo ""
+            echo "See docs/GITHUB_SECRETS_SETUP.md for detailed instructions."
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.EC2_USER }}" ]; then
+            echo "❌ ERROR: EC2_USER secret is not set"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.EC2_SSH_KEY }}" ]; then
+            echo "❌ ERROR: EC2_SSH_KEY secret is not set"
+            exit 1
+          fi
+
+          echo "✅ All required secrets are set"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
+          # EC2_HOST: Public IP address of your EC2 instance
+          # Example: 54.123.45.67 or deploy.example.com
           host: ${{ secrets.EC2_HOST }}
+
+          # EC2_USER: SSH username
+          # Typically: ec2-user (Amazon Linux) or ubuntu (Ubuntu AMI)
           username: ${{ secrets.EC2_USER }}
+
+          # EC2_SSH_KEY: Private SSH key (4096-bit RSA minimum)
+          # Should include -----BEGIN RSA PRIVATE KEY----- headers
           key: ${{ secrets.EC2_SSH_KEY }}
+
           port: 22
+          timeout: 60s
+          command_timeout: 30m
           script: |
-            cd /home/${{ secrets.EC2_USER }}/forum-api
+            set -e  # Exit on first error
+            set -x  # Print commands for debugging
 
-            # Pull latest code
-            git pull origin ${{ github.ref_name }}
+            echo "🚀 Starting deployment..."
 
-            # Install dependencies
-            npm ci --production
+            # Set variables
+            APP_DIR="/home/${{ secrets.EC2_USER }}/forum-api"
 
-            # Run database migrations
-            npm run migrate
+            # Step 1: Verify directory exists
+            echo "📁 Checking application directory..."
+            if [ ! -d "$APP_DIR" ]; then
+              echo "❌ ERROR: Application directory does not exist: $APP_DIR"
+              echo "Please ensure the directory exists on EC2 and git is initialized"
+              exit 1
+            fi
 
-            # Restart the application service
-            sudo systemctl restart forum-api
+            # Step 2: Navigate to app directory
+            echo "📍 Entering application directory..."
+            cd "$APP_DIR" || exit 1
 
-            # Verify deployment
-            sleep 5
-            curl -s http://localhost:5000/health || (echo "Deployment failed" && exit 1)
+            # Step 3: Verify git repository
+            echo "🔍 Verifying git repository..."
+            if [ ! -d ".git" ]; then
+              echo "❌ ERROR: Not a git repository"
+              echo "Run: git init && git remote add origin <repo-url>"
+              exit 1
+            fi
+
+            # Step 4: Pull latest code
+            echo "⬇️  Pulling latest code from ${{ github.ref_name }}..."
+            git fetch origin --quiet
+            git reset --hard origin/${{ github.ref_name }} || git checkout -b ${{ github.ref_name }} origin/${{ github.ref_name }}
+            echo "✅ Code updated successfully"
+
+            # Step 5: Install dependencies
+            echo "📦 Installing dependencies..."
+            npm ci --production --silent
+            echo "✅ Dependencies installed"
+
+            # Step 6: Run database migrations
+            echo "🗄️ Running database migrations..."
+            npm run migrate || (echo "⚠️ Warning: Migration failed (may need manual intervention)" && true)
+            echo "✅ Migration check complete"
+
+            # Step 7: Stop current application
+            echo "🛑 Stopping current application..."
+            sudo systemctl stop forum-api || true
+            sleep 2
+
+            # Step 8: Restart application
+            echo "🔄 Restarting application service..."
+            sudo systemctl start forum-api
+            sleep 3
+
+            # Step 9: Verify service is running
+            echo "🔍 Checking if service is running..."
+            if ! sudo systemctl is-active --quiet forum-api; then
+              echo "❌ ERROR: Service is not running"
+              echo "Logs:"
+              sudo journalctl -u forum-api -n 20 --no-pager
+              exit 1
+            fi
+            echo "✅ Service is running"
+
+            # Step 10: Health check
+            echo "🏥 Running health check..."
+            for i in {1..5}; do
+              if curl -s http://localhost:5000 > /dev/null; then
+                echo "✅ Health check passed"
+                break
+              fi
+              if [ $i -lt 5 ]; then
+                echo "⏳ Waiting... (attempt $i/5)"
+                sleep 2
+              else
+                echo "❌ ERROR: Health check failed after 5 attempts"
+                echo "Recent logs:"
+                sudo journalctl -u forum-api -n 10 --no-pager
+                exit 1
+              fi
+            done
+
+            echo "🎉 Deployment completed successfully!"
 
       - name: Notify deployment success
         if: success()

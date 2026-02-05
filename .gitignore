@@ -162,8 +162,7 @@ dist/**
 build/**
 
 ################################################################
-# Local Only
+# Local Only (Review evidence collection)
 ################################################################
-docs/
 review/
 Proyek_Kedua/

@@ -26,6 +26,7 @@
 - [Project Structure](#️-project-structure)
 - [Testing](#-testing)
 - [Docker Deployment](#-docker-deployment)
+- [Production Deployment](#-production-deployment)
 - [Development](#-development)
 - [Security](#-security)
 - [Performance](#-performance)
@@ -64,6 +65,11 @@ docker-compose exec postgres psql -U developer -d forumapi  # Access DB
 npm run migrate:test:docker      # Apply test DB migrations (Docker)
 docker-compose logs -f app       # View application logs
 docker-compose restart           # Restart all containers
+
+# Production Deployment
+# See: docs/QUICK_START_DEPLOYMENT.md for full instructions
+# Quick: Add EC2_HOST, EC2_USER, EC2_SSH_KEY to GitHub Secrets
+#        Then push to main → automatic deployment
 ```
 
 **Key Files:**
@@ -72,6 +78,11 @@ docker-compose restart           # Restart all containers
 - `package.json` - NPM scripts and dependencies
 - `migrations/` - Database schema versions
 - `src/Infrastructures/container.js` - Dependency injection
+
+**📚 Production Deployment Guides:**
+- [Quick Start Deployment](docs/QUICK_START_DEPLOYMENT.md) - Start here! (15-20 min setup)
+- [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md) - Troubleshooting and verification
+- [GitHub Secrets Setup](docs/GITHUB_SECRETS_SETUP.md) - Detailed SSH/EC2 configuration
 
 ---
 
@@ -1200,7 +1211,136 @@ See [README-DOCKER.md](README-DOCKER.md) and [DOCKER.md](DOCKER.md) for detailed
 
 ---
 
+## � Production Deployment
+
+### Quick Deployment Reference
+
+For deploying this application to production on EC2 or any server:
+
+**📚 Deployment Guides:**
+
+1. **[Quick Start Deployment](docs/QUICK_START_DEPLOYMENT.md)** ⭐ **START HERE**
+   - 4-step deployment process (15-20 minutes)
+   - EC2 instance setup
+   - GitHub Secrets configuration
+   - Automated CI/CD verification
+
+2. **[Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md)**
+   - Pre-deployment verification
+   - Step-by-step setup verification
+   - Complete troubleshooting guide
+   - Common issues and fixes
+   - Security best practices
+
+3. **[GitHub Secrets Setup Guide](docs/GITHUB_SECRETS_SETUP.md)**
+   - Detailed SSH key generation
+   - EC2 configuration
+   - Secret management
+   - Deployment monitoring
+   - Advanced troubleshooting
+
+### Deployment Architecture
+
+```
+Local Development
+       ↓
+    git push main
+       ↓
+GitHub Actions
+  ├─ CI: Lint & Test (on every push)
+  └─ CD: Deploy to EC2 (on main branch)
+       ↓
+EC2 Instance
+  ├─ Pull latest code
+  ├─ Install dependencies
+  ├─ Run migrations
+  ├─ Restart service
+  └─ Health check
+       ↓
+Production API
+(Running on EC2)
+```
+
+### Deployment Summary
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **VCS** | GitHub | Code repository |
+| **CI/CD** | GitHub Actions | Automated deploy pipeline |
+| **Server** | AWS EC2 | Production hosting |
+| **Database** | PostgreSQL 16 | Data persistence |
+| **Service Manager** | systemd | Process management |
+| **Web Server** | Nginx (recommended) | Reverse proxy, HTTPS termination |
+
+### Deployment Best Practices
+
+✅ **Security:**
+- Use 4096-bit RSA SSH keys
+- Rotate keys every 90 days
+- Limit EC2 security group access
+- Use environment variables for secrets
+- Enable HTTPS with TLS 1.2+
+
+✅ **Reliability:**
+- Enable systemd service restart on failure
+- Setup monitoring and alerts
+- Maintain database backups
+- Use health checks
+- Keep dependencies updated
+
+✅ **Performance:**
+- Use production Node.js build (npm ci --production)
+- Enable connection pooling
+- Configure rate limiting
+- Minimize log verbosity
+- Monitor resource usage
+
+### Quick Start (TL;DR)
+
+```bash
+# 1. Launch EC2 + Setup Database (see QUICK_START_DEPLOYMENT.md)
+# 2. Generate SSH key and add to EC2
+# 3. Add 3 GitHub Secrets:
+#    - EC2_HOST (IP address)
+#    - EC2_USER (username)
+#    - EC2_SSH_KEY (private key)
+# 4. Push code to main → automatic deployment
+
+# To manually trigger deployment:
+# → GitHub Actions → Continuous Deployment → Run workflow
+```
+
+### Monitoring
+
+After deployment, monitor the application:
+
+```bash
+# SSH into EC2
+ssh -i ~/.ssh/forum_api_deploy ubuntu@<EC2_HOST>
+
+# Check service status
+sudo systemctl status forum-api
+
+# View logs
+sudo journalctl -u forum-api -f  # Real-time
+sudo journalctl -u forum-api -n 50  # Last 50 lines
+
+# Test API
+curl http://localhost:5000
+
+# Check database
+psql -h localhost -U developer -d forumapi -c "SELECT COUNT(*) FROM users;"
+
+# Restart if needed
+sudo systemctl restart forum-api
+```
+
+For complete deployment instructions, see **[Quick Start Deployment Guide](docs/QUICK_START_DEPLOYMENT.md)**.
+
+---
+
 ## 💻 Development
+
 
 ### NPM Scripts Reference
 
