@@ -49,7 +49,7 @@
 ### ✅ Current Status
 
 | Component | Status | Details |
-|-----------|--------|---------|
+| ----------- | -------- | --------- |
 | **Submission** | ✅ Ready | All requirements met for Dicoding submission |
 | **Tests** | ✅ 121/121 Passing | 100% pass rate on unit & integration tests |
 | **API Tests** | ✅ 92/92 Passing | All Postman V2 endpoints verified |
@@ -62,11 +62,13 @@
 ### 🌐 Live API Access
 
 **Production API:**
-```
+
+```text
 https://icy-ideas-fix-rapidly.st.a.dcdg.xyz
 ```
 
 **Health Check:**
+
 ```bash
 curl https://icy-ideas-fix-rapidly.st.a.dcdg.xyz/health
 # Response: {"status":"success","message":"ok"}
@@ -88,6 +90,7 @@ Data Received:     12.92kB
 ```
 
 **Test Coverage:**
+
 - ✅ User registration & authentication
 - ✅ Thread CRUD operations
 - ✅ Comment management (create, delete, soft-delete)
@@ -107,14 +110,13 @@ Data Received:     12.92kB
 **CI/CD Platform:** GitHub Actions  
 
 **Deployment Timeline:**
+
 - Code push to main → GitHub Actions triggered
 - Tests run (lint, unit, integration)
 - Deploy to EC2 via SSH
 - Database migrations (auto)
 - Health check verification
 - Deployment status updated on GitHub
-
-
 
 ## ⚡ Quick Reference
 
@@ -314,8 +316,6 @@ curl -s https://icy-ideas-fix-rapidly.st.a.dcdg.xyz/health | jq .
 openssl s_client -connect icy-ideas-fix-rapidly.st.a.dcdg.xyz:443 -servername icy-ideas-fix-rapidly.st.a.dcdg.xyz
 # Should show: subject=CN=icy-ideas-fix-rapidly.st.a.dcdg.xyz (Let's Encrypt)
 ```
-
-
 
 ---
 
@@ -1721,8 +1721,6 @@ done
 }
 ```
 
-
-
 ### Key Rotation
 
 Token keys should be rotated periodically:
@@ -2014,7 +2012,7 @@ A: Yes! Update PGHOST and credentials for AWS RDS, Google Cloud SQL, etc.
 
 ### v2.0.0 (February 7, 2026) - Production Ready 🎉
 
-**Major Release - Production Deployment**
+#### Major Release - Production Deployment
 
 - ✅ **HTTPS Implementation** - Let's Encrypt SSL/TLS on dcdg.xyz subdomain
 - ✅ **Production Deployment** - Live on AWS EC2 with auto-scaling ready
@@ -2026,6 +2024,7 @@ A: Yes! Update PGHOST and credentials for AWS RDS, Google Cloud SQL, etc.
 - ✅ **Dicoding Submission Ready** - All requirements met and verified
 
 **Test Results:**
+
 - 121/121 unit & integration tests passing ✅
 - 92/92 Postman V2 API tests passing ✅
 - 118/118 assertions passing ✅
@@ -2360,6 +2359,7 @@ This project has been developed as a capstone assignment for the Dicoding course
 ### ✅ Submission Checklist
 
 **Mandatory Requirements Met:**
+
 - [x] Continuous Integration with GitHub Actions
 - [x] Continuous Deployment to production server
 - [x] Rate limiting (90 req/min on /threads)
@@ -2369,11 +2369,13 @@ This project has been developed as a capstone assignment for the Dicoding course
 - [x] Comprehensive error handling
 
 **Optional Features Implemented:**
+
 - [x] Comment likes with like count aggregation
 - [x] Comment replies (nested comment system)
 - [x] Both optional features fully integrated and tested
 
 **Test Results:**
+
 - [x] 121 unit/integration tests: ALL PASSING ✅
 - [x] 92 Postman API tests: ALL PASSING ✅
 - [x] ESLint code quality: 0 ERRORS ✅
@@ -2383,17 +2385,20 @@ This project has been developed as a capstone assignment for the Dicoding course
 ### 📞 Submission Links
 
 **Code Repository:**
-- 🔗 https://github.com/muslchn/forum_api (Public)
+
+- 🔗 <https://github.com/muslchn/forum_api> (Public)
 - Branch: `main`
 - Status: ✅ All tests passing
 
 **Live Production API:**
-- 🔗 https://icy-ideas-fix-rapidly.st.a.dcdg.xyz
+
+- 🔗 <https://icy-ideas-fix-rapidly.st.a.dcdg.xyz>
 - Protocol: HTTPS (SSL/TLS)
 - Certificate: Let's Encrypt (valid until 2026-05-08)
 - Status: ✅ Active and responding
 
 **Health Endpoint:**
+
 ```bash
 curl https://icy-ideas-fix-rapidly.st.a.dcdg.xyz/health
 # Response: {"status":"success","message":"ok"}
@@ -2432,6 +2437,7 @@ Features:
 To verify this submission:
 
 1. **Code Review:**
+
    ```bash
    git clone https://github.com/muslchn/forum_api
    cd forum_api
@@ -2441,6 +2447,7 @@ To verify this submission:
    ```
 
 2. **Deployment Verification:**
+
    ```bash
    # Health check
    curl https://icy-ideas-fix-rapidly.st.a.dcdg.xyz/health
@@ -2452,11 +2459,12 @@ To verify this submission:
    ```
 
 3. **CI/CD Verification:**
-   - Visit: https://github.com/muslchn/forum_api/actions
+   - Visit: <https://github.com/muslchn/forum_api/actions>
    - Look for "Continuous Integration" workf low with ✅ passing checks
    - Look for "Continuous Deployment" with successful EC2 deployment
 
 4. **API Tests (Using Postman/Newman):**
+
    ```bash
    npx newman run "Forum API V2 Test/Forum API V2 Test.postman_collection.json" \
      -e "Forum API V2 Test/Forum API V2 Test.postman_environment.json"
@@ -2470,6 +2478,7 @@ To verify this submission:
 **Estimated Star Rating:** ⭐⭐⭐⭐⭐ **4-5 Stars**
 
 **Justification:**
+
 - ✅ All mandatory requirements met (CI/CD, rate limiting, HTTPS)
 - ✅ Both optional features implemented (likes, replies)
 - ✅ Excellent test coverage (121 unit tests, 92 API tests)
@@ -2480,8 +2489,6 @@ To verify this submission:
 - ✅ Security best practices implemented
 
 ---
-
-
 
 - [Express.js](https://expressjs.com/) - Web framework
 - [PostgreSQL](https://www.postgresql.org/) - Database
