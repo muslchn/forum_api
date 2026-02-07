@@ -10,7 +10,7 @@ class CommentLike {
     this.createdAt = createdAt;
   }
 
-  _verifyPayload({ id, commentId, userId, createdAt }) {
+  _verifyPayload({ id, commentId, userId }) {
     if (!id || !commentId || !userId) {
       throw new Error('COMMENT_LIKE.NOT_CONTAIN_NEEDED_PROPERTY');
     }

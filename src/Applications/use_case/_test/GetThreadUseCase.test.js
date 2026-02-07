@@ -40,6 +40,7 @@ describe('GetThreadUseCase', () => {
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
 
+    /* eslint-disable camelcase */
     const replies = [
       {
         id: 'reply-123',
@@ -50,6 +51,7 @@ describe('GetThreadUseCase', () => {
         username: 'johndoe',
       },
     ];
+    /* eslint-enable camelcase */
 
     mockThreadRepository.getThreadById = vi.fn()
       .mockImplementation(() => Promise.resolve(thread));

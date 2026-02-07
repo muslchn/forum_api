@@ -102,7 +102,7 @@ jobs:
 
             # Step 5: Install dependencies
             echo "📦 Installing dependencies..."
-            npm ci --production --silent
+            npm ci --omit=dev --silent
             echo "✅ Dependencies installed"
 
             # Step 6: Run database migrations

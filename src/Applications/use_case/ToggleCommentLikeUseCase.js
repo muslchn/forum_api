@@ -1,5 +1,3 @@
-import AddCommentLike from '../../Domains/comments/entities/AddCommentLike.js';
-
 class ToggleCommentLikeUseCase {
   constructor({ commentRepository }) {
     this._commentRepository = commentRepository;
@@ -16,11 +14,6 @@ class ToggleCommentLikeUseCase {
       commentId,
       userId,
     );
-
-    const addCommentLike = new AddCommentLike({
-      commentId,
-      userId,
-    });
 
     if (hasLiked) {
       // Remove like
