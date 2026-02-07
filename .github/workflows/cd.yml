@@ -10,6 +10,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      statuses: write
+
     # Prevent concurrent deployments
     concurrency:
       group: deployment
