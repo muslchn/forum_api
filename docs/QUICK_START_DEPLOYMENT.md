@@ -9,6 +9,7 @@ Status: Production Ready
 Before you start, ensure you have:
 
 **Local Machine:**
+
 - ✅ Git installed
 - ✅ SSH client (built-in on macOS/Linux; PuTTY or Git Bash on Windows)
 - ✅ `curl` or Postman for API testing
@@ -17,12 +18,14 @@ Before you start, ensure you have:
 - ✅ Text editor or IDE for editing files
 
 **AWS Account:**
+
 - ✅ AWS account (free tier eligible for 12 months)
 - ✅ EC2 access and permissions
 - ✅ Security group creation permissions
 - ✅ Estimated cost: Free (t3.micro instance) or ~$5-10/month if beyond free tier
 
 **Knowledge:**
+
 - ✅ Basic shell/terminal commands
 - ✅ Familiarity with SSH
 - ✅ Understanding of environment variables
@@ -35,6 +38,7 @@ Before you start, ensure you have:
 This is a 4-step process that takes about 20-30 minutes total.
 
 **Estimated Timeline:**
+
 - Step 1 (EC2 setup): 10-15 minutes
 - Step 2 (SSH key): 2-3 minutes
 - Step 3 (GitHub Secrets): 3-5 minutes
@@ -186,6 +190,7 @@ Time: 5-10 minutes
     ```
 
 11. **Verification Checklist (Phase 1 Complete):**
+
     ```bash
     ✅ EC2 instance running
     ✅ Node.js v20.x installed
@@ -198,7 +203,9 @@ Time: 5-10 minutes
     ✅ forum-api systemd service enabled and running
     ✅ Service auto-restart on crash configured
     ```
+
     Test service:
+
     ```bash
     curl -s http://localhost:5000/health | jq .
     # Expected: {"status":"success","message":"ok"}
@@ -241,6 +248,7 @@ Time: 2-3 minutes
    ```
 
 4. **Verification Checklist (Phase 2 Complete):**
+
    ```bash
    ✅ SSH key pair generated (4096-bit RSA)
    ✅ Public key added to /home/ubuntu/.ssh/authorized_keys
@@ -248,7 +256,9 @@ Time: 2-3 minutes
    ✅ SSH connection successful without password
    ✅ SSH timeout configured (optional but recommended)
    ```
+
    Verify key type:
+
    ```bash
    ssh-keygen -l -f ~/.ssh/forum_api_deploy
    # Should show: 4096 SHA256:... forum-api-deploy (RSA)
@@ -299,6 +309,7 @@ Time: 3-5 minutes
    - EC2_SSH_KEY
 
 5. **Verification Checklist (Phase 3 Complete):**
+
    ```bash
    ✅ EC2_HOST set to valid IP (e.g., 54.123.45.67)
    ✅ EC2_USER set to correct username (ubuntu or ec2-user)
@@ -306,7 +317,9 @@ Time: 3-5 minutes
    ✅ All three secrets show as masked (•••••••••)
    ✅ Manual SSH connection works before CI/CD test
    ```
+
    Test secrets manually:
+
    ```bash
    # Use GitHub CLI (if installed) to verify
    gh secret list --repo muslchn/forum_api
@@ -364,6 +377,7 @@ Time: 5 minutes
    ```
 
 5. **Post-Deployment Verification Checklist:**
+
    ```bash
    ✅ Deployment workflow completed (check GitHub Actions)
    ✅ Service is running: sudo systemctl status forum-api
@@ -374,6 +388,7 @@ Time: 5 minutes
    ```
 
 6. **Full API Test (Optional but Recommended):**
+
    ```bash
    #!/bin/bash
    API="http://<EC2_HOST>:5000"
@@ -451,7 +466,8 @@ sudo systemctl status forum-api
 curl http://localhost:5000/health
 ```
 
-**Alternative: Use GitHub Release Tags**
+### Alternative: Use GitHub Release Tags
+
 ```bash
 # Tag stable version
 git tag -a v1.0.0 -m "Stable production release"
@@ -466,12 +482,14 @@ git checkout v1.0.0
 ## OPTIONAL: NGINX REVERSE PROXY & HTTPS
 
 ### Why Nginx?
+
 - Reverse proxy to Node.js
 - Handle HTTPS/TLS termination
 - Static file serving
 - Rate limiting at web server level
 
-### Quick Setup:
+### Quick Setup
+
 ```bash
 # Install Nginx
 sudo apt install -y nginx
@@ -519,7 +537,8 @@ sudo systemctl enable nginx
 curl http://localhost/health
 ```
 
-### HTTPS with Let's Encrypt (Free SSL):
+### HTTPS with Let's Encrypt (Free SSL)
+
 ```bash
 # Install certbot
 sudo apt install -y certbot python3-certbot-nginx
@@ -535,7 +554,8 @@ sudo systemctl enable certbot.timer
 
 ## OPTIONAL: DATABASE BACKUPS
 
-### Daily Backup Script:
+### Daily Backup Script
+
 ```bash
 # Create backup directory
 mkdir -p /home/ubuntu/backups
@@ -564,7 +584,8 @@ chmod +x /home/ubuntu/backup-db.sh
 (crontab -l 2>/dev/null; echo "0 2 * * * /home/ubuntu/backup-db.sh") | crontab -
 ```
 
-### Restore from Backup:
+### Restore from Backup
+
 ```bash
 # List backups
 ls -lh /home/ubuntu/backups/
@@ -576,8 +597,6 @@ gzip -dc /home/ubuntu/backups/forumapi_20260206_020000.sql.gz | psql -U develope
 ---
 
 ## MONITORING & MAINTENANCE
-
-________________________________________________________________
 
 ### View deployment logs
 
@@ -618,7 +637,8 @@ free -h
 - If health check fails, deployment is marked as failed
 - Health check validates: HTTP 200 + `{"status":"success"}`
 
-### Set Up Log Monitoring (Optional):
+### Set Up Log Monitoring (Optional)
+
 ```bash
 # Real-time log stream on EC2
 sudo journalctl -u forum-api -f
@@ -630,8 +650,6 @@ sudo journalctl -u forum-api -f
 ---
 
 ## TROUBLESHOOTING
-
-________________________________________________________________
 
 ### Deployment fails with "missing server host"
 
@@ -701,8 +719,6 @@ sudo kill -9 <PID>
 
 ## FREQUENTLY ASKED QUESTIONS (FAQ)
 
-________________________________________________________________
-
 **Q: Can I use a different database password?**
 A: Yes! Edit .env and change `PGPASSWORD`. Just remember it for future logins.
 
@@ -736,8 +752,6 @@ A: Yes! Create separate GitHub Secrets for each (EC2_HOST_US, EC2_HOST_EU, etc.)
 ---
 
 ## USEFUL COMMANDS
-
-________________________________________________________________
 
 ### SSH into EC2
 
@@ -823,8 +837,6 @@ ss -tulpn | grep 5000
 
 ## SECURITY BEST PRACTICES
 
-________________________________________________________________
-
 ✅ DO:
 
 - Keep SSH key secure (encrypted drive, not cloud storage)
@@ -852,7 +864,8 @@ ________________________________________________________________
 - Mix development and production secrets
 - Forget to update security group rules
 
-### Security Hardening (Extra):
+### Security Hardening (Extra)
+
 ```bash
 # Disable password-based SSH (key-only)
 sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
@@ -874,8 +887,6 @@ sudo systemctl enable fail2ban
 
 ## NEXT STEPS
 
-________________________________________________________________
-
 1. ✅ Complete all 4 deployment steps above
 2. ✅ Use verification checklists after each phase
 3. ✅ Run the full API test (register → login → create thread)
@@ -888,6 +899,7 @@ ________________________________________________________________
 10. ✅ After verification, submit to Dicoding review
 
 **Deployment Success Signals:**
+
 - ✅ GitHub Actions workflow succeeded (green checkmark)
 - ✅ `curl http://localhost:5000/health` returns `{"status":"success"}`
 - ✅ `sudo systemctl status forum-api` shows `active (running)`
