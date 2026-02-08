@@ -58,7 +58,9 @@ jobs:
         env:
           DATABASE_URL: postgresql://developer:supersecretpassword@localhost:5432/forumapi_test
           NODE_ENV: test
-          JWT_SECRET: test-secret-key
+          ACCESS_TOKEN_KEY: test-access-token-secret-key-for-ci
+          REFRESH_TOKEN_KEY: test-refresh-token-secret-key-for-ci
+          ACCESS_TOKEN_AGE: 3000
           BCRYPT_SALT_ROUND: 10
 
       - name: Generate coverage report
@@ -66,7 +68,9 @@ jobs:
         env:
           DATABASE_URL: postgresql://developer:supersecretpassword@localhost:5432/forumapi_test
           NODE_ENV: test
-          JWT_SECRET: test-secret-key
+          ACCESS_TOKEN_KEY: test-access-token-secret-key-for-ci
+          REFRESH_TOKEN_KEY: test-refresh-token-secret-key-for-ci
+          ACCESS_TOKEN_AGE: 3000
           BCRYPT_SALT_ROUND: 10
         continue-on-error: true
 
