@@ -161,18 +161,35 @@ describe('HTTP server', () => {
 
   describe('when POST /authentications', () => {
     it('should response 201 and new authentication', async () => {
+      // Use timestamp-based unique username to prevent conflicts
+      const username = `auth_login_test_${Date.now()}`;
+      const password = 'secret';
+
       const requestPayload = {
-        username: 'dicoding',
-        password: 'secret',
+        username,
+        password,
       };
       const app = await createServer(container);
 
-      await request(app).post('/users').send({
-        username: 'dicoding',
-        password: 'secret',
+      // Register user first
+      const registerResponse = await request(app).post('/users').send({
+        username,
+        password,
         fullname: 'Dicoding Indonesia',
       });
 
+      // Verify registration succeeded
+      expect(registerResponse.status).toEqual(201);
+      expect(registerResponse.body.status).toEqual('success');
+      expect(registerResponse.body.data.addedUser).toBeDefined();
+
+      // Verify user persisted in database
+      const createdUserId = registerResponse.body.data.addedUser.id;
+      const users = await UsersTableTestHelper.findUsersById(createdUserId);
+      expect(users).toHaveLength(1);
+      expect(users[0].username).toEqual(username);
+
+      // Test authentication
       const response = await request(app).post('/authentications').send(requestPayload);
 
       expect(response.status).toEqual(201);
