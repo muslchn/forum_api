@@ -118,25 +118,44 @@ describe('HTTP server', () => {
     });
 
     it('should response 400 when username unavailable', async () => {
-      // Arrange
-      const requestPayload = {
-        username: 'dicoding',
+      // Arrange: Use unique username to prevent conflicts
+      const username = 'unavailable_username_test';
+      const firstRequestPayload = {
+        username,
         password: 'secret',
         fullname: 'Dicoding Indonesia',
       };
       const app = await createServer(container);
 
-      // First registration - should succeed
-      const firstResponse = await request(app).post('/users').send(requestPayload);
+      // Step 1: First registration - should succeed
+      const firstResponse = await request(app).post('/users').send(firstRequestPayload);
       expect(firstResponse.status).toEqual(201);
+      expect(firstResponse.body.status).toEqual('success');
+      expect(firstResponse.body.data.addedUser).toBeDefined();
+      expect(firstResponse.body.data.addedUser.username).toEqual(username);
 
-      // Second registration with same username - should fail
-      const response = await request(app).post('/users').send(requestPayload);
+      // Verify user was actually created in database
+      const createdUserId = firstResponse.body.data.addedUser.id;
+      const usersAfterFirst = await UsersTableTestHelper.findUsersById(createdUserId);
+      expect(usersAfterFirst).toHaveLength(1);
+      expect(usersAfterFirst[0].username).toEqual(username);
 
-      // Assert
+      // Step 2: Second registration with same username - should fail
+      const secondRequestPayload = {
+        username,
+        password: 'different_secret',
+        fullname: 'Another Name',
+      };
+      const response = await request(app).post('/users').send(secondRequestPayload);
+
+      // Assert: Should get 400 for duplicate username
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
       expect(response.body.message).toEqual('username tidak tersedia');
+
+      // Verify still only one user with this id exists
+      const usersAfterSecond = await UsersTableTestHelper.findUsersById(createdUserId);
+      expect(usersAfterSecond).toHaveLength(1);
     });
   });
 
