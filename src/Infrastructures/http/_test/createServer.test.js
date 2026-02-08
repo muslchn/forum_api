@@ -183,12 +183,16 @@ describe('HTTP server', () => {
       };
       const app = await createServer(container);
 
-      await request(app).post('/users').send({
+      // Create user and verify registration succeeded
+      const registerResponse = await request(app).post('/users').send({
         username: 'dicoding',
         password: 'secret',
         fullname: 'Dicoding Indonesia',
       });
+      expect(registerResponse.status).toEqual(201);
+      expect(registerResponse.body.data.addedUser).toBeDefined();
 
+      // Now test authentication with wrong password
       const response = await request(app).post('/authentications').send(requestPayload);
 
       expect(response.status).toEqual(401);
