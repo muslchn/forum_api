@@ -99,6 +99,10 @@ describe('ThreadRepositoryPostgres', () => {
       await UsersTableTestHelper.addUser({ id: 'thread-verify-user', username: 'thread_verify_user' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-verify', owner: 'thread-verify-user' });
 
+      // Verify thread was actually inserted
+      const threads = await ThreadsTableTestHelper.findThreadsById('thread-verify');
+      expect(threads).toHaveLength(1);
+
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
       await expect(threadRepositoryPostgres.verifyThreadExists('thread-verify'))
