@@ -23,7 +23,7 @@
     "node-pg-migrate": "^8.0.4",
     "express": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "dotenv": "^16.6.1",
     "instances-container": "^2.0.6",
     "nanoid": "^5.0.9",
