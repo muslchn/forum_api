@@ -106,7 +106,8 @@ Data Received:     12.92kB
 **Deployment Method:** AWS EC2 + GitHub Actions CI/CD  
 **Database:** PostgreSQL 16 (managed)  
 **Web Server:** Nginx with Let's Encrypt SSL  
-**Auto-deployment:** On push to main branch  
+**Auto-deployment:** After CI succeeds on main branch (CI→CD gating)  
+**Manual deploy:** Available via `workflow_dispatch` in GitHub Actions  
 **CI/CD Platform:** GitHub Actions  
 
 **Deployment Timeline:**
@@ -547,6 +548,13 @@ PGPORT=5432                 # PostgreSQL port
 PGUSER=developer            # Database user
 PGPASSWORD=supersecret      # Database password (change this!)
 PGDATABASE=forumapi         # Main database name
+```
+
+#### Database URL (CI/containers)
+
+```bash
+# Optional: used in CI and containerized environments
+DATABASE_URL=postgresql://developer:supersecretpassword@localhost:5432/forumapi
 ```
 
 #### Test Database
