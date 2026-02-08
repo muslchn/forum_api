@@ -120,6 +120,10 @@ describe('HTTP server', () => {
     it('should response 400 when username unavailable', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ username: 'dicoding' });
+      // Verify user was actually inserted before proceeding
+      const users = await UsersTableTestHelper.findUsersById('user-123');
+      expect(users).toHaveLength(1);
+
       const requestPayload = {
         username: 'dicoding',
         fullname: 'Dicoding Indonesia',
