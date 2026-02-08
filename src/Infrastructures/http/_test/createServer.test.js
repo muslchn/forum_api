@@ -177,22 +177,39 @@ describe('HTTP server', () => {
     });
 
     it('should response 401 if password wrong', async () => {
+      const username = 'dicoding_auth_test';
+      const password = 'secret';
+      const wrongPassword = 'wrong_password';
+
       const requestPayload = {
-        username: 'dicoding',
-        password: 'wrong_password',
+        username,
+        password: wrongPassword,
       };
+
       const app = await createServer(container);
 
-      // Create user and verify registration succeeded
+      // Step 1: Register user and verify it succeeded
       const registerResponse = await request(app).post('/users').send({
-        username: 'dicoding',
-        password: 'secret',
+        username,
+        password,
         fullname: 'Dicoding Indonesia',
       });
-      expect(registerResponse.status).toEqual(201);
-      expect(registerResponse.body.data.addedUser).toBeDefined();
 
-      // Now test authentication with wrong password
+      expect(registerResponse.status).toEqual(201);
+      expect(registerResponse.body.status).toEqual('success');
+      expect(registerResponse.body.data.addedUser).toBeDefined();
+      expect(registerResponse.body.data.addedUser.username).toEqual(username);
+
+      // Step 2: Verify user can login with correct password
+      const validLoginResponse = await request(app).post('/authentications').send({
+        username,
+        password,
+      });
+
+      expect(validLoginResponse.status).toEqual(201);
+      expect(validLoginResponse.body.data.accessToken).toBeDefined();
+
+      // Step 3: Test authentication with wrong password - should get 401
       const response = await request(app).post('/authentications').send(requestPayload);
 
       expect(response.status).toEqual(401);
