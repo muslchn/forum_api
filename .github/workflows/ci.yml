@@ -48,7 +48,7 @@ jobs:
         continue-on-error: false
 
       - name: Run database migrations for test
-        run: npm run migrate:test
+        run: npx node-pg-migrate up
         env:
           DATABASE_URL: postgresql://developer:supersecretpassword@localhost:5432/forumapi_test
           NODE_ENV: test
