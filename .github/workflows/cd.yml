@@ -1,13 +1,19 @@
 name: Continuous Deployment
 
 on:
-  push:
+  # Deploy only after CI completes successfully to avoid releasing broken builds.
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
     branches:
       - main
       - master
+  workflow_dispatch:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     permissions:
