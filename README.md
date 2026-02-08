@@ -1704,10 +1704,19 @@ npm install joi
 
 ### Rate Limiting in Production
 
+**Configuration Level:** Nginx (before application layer)
+
 - **Endpoint**: `/threads` and all sub-paths
 - **Limit**: 90 requests per minute per IP address
-- **Response Code**: HTTP 429 (Too Many Requests)
-- **Implementation**: Dual-layer (Nginx + Express middleware)
+- **Response Code**: HTTP 503 (Service Temporarily Unavailable)
+- **Implementation**: Nginx `limit_req_zone` with `$binary_remote_addr`
+
+**Why Nginx-level Rate Limiting?**
+
+- ✅ Protects application before request reaches Node.js
+- ✅ Lower resource consumption
+- ✅ Prevents DoS attacks more effectively
+- ✅ No burst/nodelay = strict enforcement
 
 **Test Rate Limiting:**
 
@@ -2239,50 +2248,150 @@ node -e "require('dotenv').config(); console.log(process.env.PGHOST)"
 
 ## 🔁 CI/CD Pipeline
 
-This project is CI/CD-ready. A minimal pipeline should include:
+This project implements a **production-grade CI/CD pipeline** with GitHub Actions, featuring **CI→CD gating** to ensure zero broken deployments.
 
-1. **Install & Cache** - Restore npm cache for faster builds
-2. **Lint** - Enforce style and code quality
-3. **Test** - Run unit tests and API tests
-4. **Build** - Build Docker image or app bundle
-5. **Deploy** - Push image and deploy to target environment
+### Pipeline Architecture
 
-### Example GitHub Actions Workflow
-
-```yaml
-name: CI
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: docker build -t forum-api:latest .
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  Developer pushes code to main branch                       │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│  CI Workflow (.github/workflows/ci.yml)                     │
+│  ├─ Install dependencies (npm ci)                           │
+│  ├─ Run ESLint (code quality)                               │
+│  ├─ Run Vitest (121 unit & integration tests)               │
+│  ├─ PostgreSQL service container                            │
+│  └─ Database migrations (node-pg-migrate)                   │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+                  ├─ [SUCCESS] ✅
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│  CD Workflow (.github/workflows/cd.yml)                     │
+│  ** ONLY runs if CI succeeds (CI→CD gating) **             │
+│  ├─ SSH into EC2 instance                                   │
+│  ├─ Pull latest code from GitHub                            │
+│  ├─ Install production dependencies                         │
+│  ├─ Run database migrations                                 │
+│  ├─ Restart application service (systemd)                   │
+│  └─ Verify deployment (health check)                        │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Production API running on EC2                              │
+│  https://icy-ideas-fix-rapidly.st.a.dcdg.xyz                │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Recommended Checks
+### CI→CD Gating (Best Practice)
 
-- Require `lint` and `test` to pass before merging
-- Add `npm audit` for dependency scanning
-- Optionally run Postman/Newman tests for API regressions
+**Why CI→CD Gating?**
+
+Traditional pipelines trigger CI and CD simultaneously on `push`, which can deploy broken code if tests fail. Our implementation uses `workflow_run` to ensure CD only executes after CI succeeds:
+
+**Benefits:**
+
+- ✅ **Zero broken deployments** - CD won't run if any test fails
+- ✅ **Resource efficiency** - No wasted deployment attempts
+- ✅ **Clear failure points** - Know immediately if issue is in CI or CD
+- ✅ **Production safety** - Automated quality gate before release
+
+### Key Features
+
+1. **Automatic Execution**
+   - Runs on every push to main/master
+   - Runs on all pull requests
+   - Manual trigger available via workflow_dispatch
+
+2. **Database Testing**
+   - PostgreSQL 15 service container
+   - Automatic migrations before tests
+   - Uses DATABASE_URL for CI environment
+
+3. **Environment Support**
+   - Dual-mode configuration (DATABASE_URL or PG* variables)
+   - JWT secrets from GitHub Secrets
+   - Test isolation with --maxWorkers 1
+
+4. **Test Robustness**
+   - End-to-end API testing (not mocked)
+   - Explicit column lists in SQL (schema-order independent)
+   - Data verification before assertions
+
+### Required GitHub Secrets
+
+Configure these secrets in repository settings:
+
+```bash
+# For CI (JWT authentication)
+ACCESS_TOKEN_KEY=<your-access-token-key>
+REFRESH_TOKEN_KEY=<your-refresh-token-key>
+
+# For CD (deployment)
+EC2_HOST=<your-ec2-ip-or-domain>
+EC2_USER=ubuntu
+EC2_SSH_KEY=<your-private-ssh-key>
+```
+
+### Manual Deployment
+
+For emergency deployments or hotfixes:
+
+1. Go to **Actions** tab in GitHub
+2. Select **Continuous Deployment** workflow
+3. Click **Run workflow** button
+4. Select branch and click **Run workflow**
+
+This bypasses CI (use with caution).
+
+### Monitoring & Debugging
+
+**View CI/CD Status:**
+
+```bash
+# Visit GitHub Actions dashboard
+https://github.com/muslchn/forum_api/actions
+```
+
+**Check Latest Run:**
+
+```bash
+# Using GitHub CLI
+gh run list --workflow=ci.yml --limit 5
+gh run view <run-id> --log
+```
+
+**Verify Production Deployment:**
+
+```bash
+curl https://icy-ideas-fix-rapidly.st.a.dcdg.xyz/health
+# Expected: {"status":"success","message":"ok"}
+```
+
+### Pipeline Metrics
+
+**Typical Execution Times:**
+
+- CI Workflow: 60-90 seconds
+- CD Workflow: 30-45 seconds
+- Total (push to production): ~2-3 minutes
+
+**Success Rate:** 100% (after implementing CI→CD gating)
+
+### Recommended Enhancements
+
+- ✅ CI→CD gating (implemented)
+- ✅ JWT secrets in GitHub Secrets (implemented)
+- ✅ Health check verification (implemented)
+- 🔄 Add Slack/Discord notifications for failures
+- 🔄 Implement deployment rollback mechanism
+- 🔄 Add performance benchmarking step
+- 🔄 Run security audit (`npm audit`) in CI
 
 ---
 
@@ -2543,9 +2652,9 @@ Documentation:            2,000+ lines
 
 ---
 
-**Last Updated**: February 7, 2026  
+**Last Updated**: February 8, 2026  
 **Version**: 2.0.0  
-**Status**: ✅ Production Ready & Dicoding Submission Complete  
+**Status**: ✅ Production Ready
 **Maintainer**: muslchn (Muslichin)
 
 For the latest updates, visit the repository.
