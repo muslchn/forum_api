@@ -119,20 +119,18 @@ describe('HTTP server', () => {
 
     it('should response 400 when username unavailable', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ id: 'existing-user', username: 'dicoding' });
-      // Verify user was actually inserted before proceeding
-      const users = await UsersTableTestHelper.findUsersById('existing-user');
-      expect(users).toHaveLength(1);
-      expect(users[0].username).toEqual('dicoding');
-
       const requestPayload = {
         username: 'dicoding',
+        password: 'secret',
         fullname: 'Dicoding Indonesia',
-        password: 'super_secret',
       };
       const app = await createServer(container);
 
-      // Action
+      // First registration - should succeed
+      const firstResponse = await request(app).post('/users').send(requestPayload);
+      expect(firstResponse.status).toEqual(201);
+
+      // Second registration with same username - should fail
       const response = await request(app).post('/users').send(requestPayload);
 
       // Assert
