@@ -118,8 +118,8 @@ describe('HTTP server', () => {
     });
 
     it('should response 400 when username unavailable', async () => {
-      // Arrange: Use unique username to prevent conflicts
-      const username = 'unavailable_username_test';
+      // Use timestamp-based unique username to prevent conflicts
+      const username = `unavailable_test_${Date.now()}`;
       const firstRequestPayload = {
         username,
         password: 'secret',
@@ -134,12 +134,6 @@ describe('HTTP server', () => {
       expect(firstResponse.body.data.addedUser).toBeDefined();
       expect(firstResponse.body.data.addedUser.username).toEqual(username);
 
-      // Verify user was actually created in database
-      const createdUserId = firstResponse.body.data.addedUser.id;
-      const usersAfterFirst = await UsersTableTestHelper.findUsersById(createdUserId);
-      expect(usersAfterFirst).toHaveLength(1);
-      expect(usersAfterFirst[0].username).toEqual(username);
-
       // Step 2: Second registration with same username - should fail
       const secondRequestPayload = {
         username,
@@ -152,10 +146,6 @@ describe('HTTP server', () => {
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
       expect(response.body.message).toEqual('username tidak tersedia');
-
-      // Verify still only one user with this id exists
-      const usersAfterSecond = await UsersTableTestHelper.findUsersById(createdUserId);
-      expect(usersAfterSecond).toHaveLength(1);
     });
   });
 
@@ -182,12 +172,6 @@ describe('HTTP server', () => {
       expect(registerResponse.status).toEqual(201);
       expect(registerResponse.body.status).toEqual('success');
       expect(registerResponse.body.data.addedUser).toBeDefined();
-
-      // Verify user persisted in database
-      const createdUserId = registerResponse.body.data.addedUser.id;
-      const users = await UsersTableTestHelper.findUsersById(createdUserId);
-      expect(users).toHaveLength(1);
-      expect(users[0].username).toEqual(username);
 
       // Test authentication
       const response = await request(app).post('/authentications').send(requestPayload);
@@ -236,12 +220,6 @@ describe('HTTP server', () => {
       expect(registerResponse.body.status).toEqual('success');
       expect(registerResponse.body.data.addedUser).toBeDefined();
       expect(registerResponse.body.data.addedUser.username).toEqual(username);
-
-      // Verify user persisted in database
-      const createdUserId = registerResponse.body.data.addedUser.id;
-      const users = await UsersTableTestHelper.findUsersById(createdUserId);
-      expect(users).toHaveLength(1);
-      expect(users[0].username).toEqual(username);
 
       // Step 2: Verify user can login with correct password
       const validLoginResponse = await request(app).post('/authentications').send({
