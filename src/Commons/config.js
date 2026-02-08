@@ -29,11 +29,11 @@ function getDatabaseConfig() {
         password: url.password,
         database: url.pathname.slice(1), // Remove leading '/'
       };
-    } catch (error) {
+    } catch {
       // Fall through to use individual variables
     }
   }
-  
+
   // Use individual PG variables (local development)
   return {
     host: process.env.PGHOST,
