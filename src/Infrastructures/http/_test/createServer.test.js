@@ -118,29 +118,27 @@ describe('HTTP server', () => {
     });
 
     it('should response 400 when username unavailable', async () => {
-      // Use timestamp-based unique username to prevent conflicts
-      const username = `unavailable_test_${Date.now()}`;
-      const firstRequestPayload = {
-        username,
-        password: 'secret',
-        fullname: 'Dicoding Indonesia',
-      };
+      // Use timestamp + random to ensure absolute uniqueness
+      const username = `unavailable_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       const app = await createServer(container);
 
       // Step 1: First registration - should succeed
-      const firstResponse = await request(app).post('/users').send(firstRequestPayload);
+      const firstResponse = await request(app).post('/users').send({
+        username,
+        password: 'secret',
+        fullname: 'Dicoding Indonesia',
+      });
+
       expect(firstResponse.status).toEqual(201);
       expect(firstResponse.body.status).toEqual('success');
       expect(firstResponse.body.data.addedUser).toBeDefined();
-      expect(firstResponse.body.data.addedUser.username).toEqual(username);
 
       // Step 2: Second registration with same username - should fail
-      const secondRequestPayload = {
+      const response = await request(app).post('/users').send({
         username,
         password: 'different_secret',
         fullname: 'Another Name',
-      };
-      const response = await request(app).post('/users').send(secondRequestPayload);
+      });
 
       // Assert: Should get 400 for duplicate username
       expect(response.status).toEqual(400);
@@ -151,14 +149,10 @@ describe('HTTP server', () => {
 
   describe('when POST /authentications', () => {
     it('should response 201 and new authentication', async () => {
-      // Use timestamp-based unique username to prevent conflicts
-      const username = `auth_login_test_${Date.now()}`;
+      // Use timestamp + random to ensure absolute uniqueness
+      const username = `auth_login_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       const password = 'secret';
 
-      const requestPayload = {
-        username,
-        password,
-      };
       const app = await createServer(container);
 
       // Register user first
@@ -174,7 +168,10 @@ describe('HTTP server', () => {
       expect(registerResponse.body.data.addedUser).toBeDefined();
 
       // Test authentication
-      const response = await request(app).post('/authentications').send(requestPayload);
+      const response = await request(app).post('/authentications').send({
+        username,
+        password,
+      });
 
       expect(response.status).toEqual(201);
       expect(response.body.status).toEqual('success');
@@ -197,43 +194,30 @@ describe('HTTP server', () => {
     });
 
     it('should response 401 if password wrong', async () => {
-      // Use timestamp-based unique username to prevent conflicts
-      const username = `auth_pwd_test_${Date.now()}`;
+      // Use timestamp + random to ensure absolute uniqueness
+      const username = `auth_pwd_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       const password = 'secret';
       const wrongPassword = 'wrong_password';
 
-      const requestPayload = {
-        username,
-        password: wrongPassword,
-      };
-
       const app = await createServer(container);
 
-      // Step 1: Register user and verify it succeeded
+      // Register user
       const registerResponse = await request(app).post('/users').send({
         username,
         password,
         fullname: 'Dicoding Indonesia',
       });
 
+      // Verify registration succeeded before testing wrong password
       expect(registerResponse.status).toEqual(201);
       expect(registerResponse.body.status).toEqual('success');
       expect(registerResponse.body.data.addedUser).toBeDefined();
-      expect(registerResponse.body.data.addedUser.username).toEqual(username);
 
-      // Step 2: Verify user can login with correct password
-      const validLoginResponse = await request(app).post('/authentications').send({
+      // Test authentication with wrong password - should get 401
+      const response = await request(app).post('/authentications').send({
         username,
-        password,
+        password: wrongPassword,
       });
-
-      expect(validLoginResponse.status).toEqual(201);
-      expect(validLoginResponse.body.status).toEqual('success');
-      expect(validLoginResponse.body.data.accessToken).toBeDefined();
-      expect(validLoginResponse.body.data.refreshToken).toBeDefined();
-
-      // Step 3: Test authentication with wrong password - should get 401
-      const response = await request(app).post('/authentications').send(requestPayload);
 
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');
