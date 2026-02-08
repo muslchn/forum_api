@@ -196,7 +196,8 @@ describe('HTTP server', () => {
     });
 
     it('should response 401 if password wrong', async () => {
-      const username = 'dicoding_auth_test';
+      // Use timestamp-based unique username to prevent conflicts
+      const username = `auth_pwd_test_${Date.now()}`;
       const password = 'secret';
       const wrongPassword = 'wrong_password';
 
@@ -219,6 +220,12 @@ describe('HTTP server', () => {
       expect(registerResponse.body.data.addedUser).toBeDefined();
       expect(registerResponse.body.data.addedUser.username).toEqual(username);
 
+      // Verify user persisted in database
+      const createdUserId = registerResponse.body.data.addedUser.id;
+      const users = await UsersTableTestHelper.findUsersById(createdUserId);
+      expect(users).toHaveLength(1);
+      expect(users[0].username).toEqual(username);
+
       // Step 2: Verify user can login with correct password
       const validLoginResponse = await request(app).post('/authentications').send({
         username,
@@ -226,7 +233,9 @@ describe('HTTP server', () => {
       });
 
       expect(validLoginResponse.status).toEqual(201);
+      expect(validLoginResponse.body.status).toEqual('success');
       expect(validLoginResponse.body.data.accessToken).toBeDefined();
+      expect(validLoginResponse.body.data.refreshToken).toBeDefined();
 
       // Step 3: Test authentication with wrong password - should get 401
       const response = await request(app).post('/authentications').send(requestPayload);
