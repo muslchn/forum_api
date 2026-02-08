@@ -23,39 +23,48 @@ describe('ThreadRepositoryPostgres', () => {
 
   describe('addThread function', () => {
     it('should persist new thread correctly', async () => {
-      await UsersTableTestHelper.addUser({ id: 'thread-user-1', username: 'thread_user_1' });
+      // Setup: Create user with unique ID
+      await UsersTableTestHelper.addUser({ id: 'add-thread-user-1', username: 'add_thread_user_1' });
       const newThread = new NewThread({
         title: 'thread title',
         body: 'thread body',
-        owner: 'thread-user-1',
+        owner: 'add-thread-user-1',
       });
-      const fakeIdGenerator = () => '123';
+      const fakeIdGenerator = () => 'add-1';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
+      // Act
       const addedThread = await threadRepositoryPostgres.addThread(newThread);
 
-      // Verify thread was actually added to database
+      // Assert: Verify return value
       expect(addedThread.id).toBeDefined();
-      const threads = await ThreadsTableTestHelper.findThreadsById('thread-123');
+      expect(addedThread.id).toEqual('thread-add-1');
+
+      // Assert: Verify database persistence
+      const threads = await ThreadsTableTestHelper.findThreadsById('thread-add-1');
       expect(threads).toHaveLength(1);
+      expect(threads[0].title).toEqual('thread title');
     });
 
     it('should return added thread correctly', async () => {
-      await UsersTableTestHelper.addUser({ id: 'thread-user-2', username: 'thread_user_2' });
+      // Setup: Create user with unique ID
+      await UsersTableTestHelper.addUser({ id: 'add-thread-user-2', username: 'add_thread_user_2' });
       const newThread = new NewThread({
         title: 'thread title',
         body: 'thread body',
-        owner: 'thread-user-2',
+        owner: 'add-thread-user-2',
       });
-      const fakeIdGenerator = () => '123';
+      const fakeIdGenerator = () => 'add-2';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
+      // Act
       const addedThread = await threadRepositoryPostgres.addThread(newThread);
 
+      // Assert
       expect(addedThread).toStrictEqual(new AddedThread({
-        id: 'thread-123',
+        id: 'thread-add-2',
         title: 'thread title',
-        owner: 'thread-user-2',
+        owner: 'add-thread-user-2',
       }));
     });
   });
